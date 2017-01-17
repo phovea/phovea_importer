@@ -49,7 +49,6 @@ export function createDialog(title: string, classSuffix: string, onSubmit: ()=>a
   dialog.body.classList.add('caleydo-importer-' + classSuffix);
   const form = document.createElement('form');
   dialog.body.appendChild(form);
-  dialog.body = form;
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     onSubmit();
@@ -204,9 +203,9 @@ function editCategorical(definition: ITypeDefinition) {
     textarea.addEventListener('keydown', function (e: KeyboardEvent) {
       if (e.keyCode === 9 || e.which === 9) {
         e.preventDefault();
-        var s = this.selectionStart;
-        this.value = this.value.substring(0, this.selectionStart) + '\t' + this.value.substring(this.selectionEnd);
-        this.selectionEnd = s + 1;
+        const s = textarea.selectionStart;
+        textarea.value = textarea.value.substring(0, textarea.selectionStart) + '\t' + textarea.value.substring(textarea.selectionEnd);
+        textarea.selectionEnd = s + 1;
       }
     });
     dialog.show();
@@ -214,17 +213,17 @@ function editCategorical(definition: ITypeDefinition) {
 }
 
 function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
-  const any_def: any = def;
-  if (typeof any_def.categories !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.categories !== 'undefined') {
     return def;
   }
   //unique values
-  var cache = {};
+  const cache = {};
   data.forEach((row) => {
     const v = accessor(row);
     cache[v] = v;
   });
-  any_def.categories = Object.keys(cache).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).map((cat, i) => ({
+  anyDef.categories = Object.keys(cache).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).map((cat, i) => ({
     name: cat,
     color: categoryColors[i] || 'gray'
   }));
@@ -237,9 +236,9 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
     return 0;
   }
   const categories = {};
-  var validSize = 0;
+  let validSize = 0;
   for (let i = 0; i < testSize; ++i) {
-    let v = accessor(data[i]);
+    const v = accessor(data[i]);
     if (v == null || v.trim().length === 0) {
       continue; //skip empty samples
     }
@@ -247,8 +246,8 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
     categories[v] = v;
   }
 
-  const num_cats = Object.keys(categories).length;
-  return 1 - num_cats / validSize;
+  const numCats = Object.keys(categories).length;
+  return 1 - numCats / validSize;
 }
 
 function parseCategorical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {

@@ -38,7 +38,7 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
         </div>
     `;
     (<HTMLSelectElement>(dialog.body.querySelector('select'))).addEventListener('change', function (e) {
-      (<HTMLInputElement>(dialog.body.querySelector('input'))).disabled = this.selectedIndex !== 0;
+      (<HTMLInputElement>(dialog.body.querySelector('input'))).disabled = (<HTMLSelectElement>this).selectedIndex !== 0;
     });
 
     dialog.show();
