@@ -63,7 +63,7 @@ export class Importer extends EventHandler {
   }
 
   private selectedFile(file: File) {
-    var name = file.name;
+    let name = file.name;
     name = name.substring(0, name.lastIndexOf('.')); //remove .csv
 
     Promise.all([<any>parseCSV(file), createValueTypeEditors()]).then((results) => {
