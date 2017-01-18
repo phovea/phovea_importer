@@ -49,7 +49,6 @@ export function createDialog(title: string, classSuffix: string, onSubmit: ()=>a
   dialog.body.classList.add('caleydo-importer-' + classSuffix);
   const form = document.createElement('form');
   dialog.body.appendChild(form);
-  dialog.body = form;
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     onSubmit();
@@ -132,11 +131,11 @@ function editString(definition: ITypeDefinition) {
 }
 
 function guessString(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
-  const any_def: any = def;
-  if (typeof any_def.convert !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.convert !== 'undefined') {
     return def;
   }
-  any_def.convert = null;
+  anyDef.convert = null;
   return def;
 }
 
@@ -158,7 +157,7 @@ function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, val
 
   const invalid = [];
   data.forEach((d, i) => {
-    var v = String(accessor(d));
+    let v = String(accessor(d));
     v = op(v);
     accessor(d, v);
   });
@@ -187,7 +186,7 @@ function editCategorical(definition: ITypeDefinition) {
     const dialog = createDialog('Edit Categories (name TAB color)', 'categorical', () => {
       const text = (<HTMLTextAreaElement>dialog.body.querySelector('textarea')).value;
       const categories = text.trim().split('\n').map((row) => {
-        var l = row.trim().split('\t');
+        const l = row.trim().split('\t');
         return {name: l[0].trim(), color: l.length > 1 ? l[1].trim() : 'gray'};
       });
       dialog.hide();
@@ -204,9 +203,9 @@ function editCategorical(definition: ITypeDefinition) {
     textarea.addEventListener('keydown', function (e: KeyboardEvent) {
       if (e.keyCode === 9 || e.which === 9) {
         e.preventDefault();
-        var s = this.selectionStart;
-        this.value = this.value.substring(0, this.selectionStart) + '\t' + this.value.substring(this.selectionEnd);
-        this.selectionEnd = s + 1;
+        const s = textarea.selectionStart;
+        textarea.value = textarea.value.substring(0, textarea.selectionStart) + '\t' + textarea.value.substring(textarea.selectionEnd);
+        textarea.selectionEnd = s + 1;
       }
     });
     dialog.show();
@@ -214,17 +213,17 @@ function editCategorical(definition: ITypeDefinition) {
 }
 
 function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
-  const any_def: any = def;
-  if (typeof any_def.categories !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.categories !== 'undefined') {
     return def;
   }
   //unique values
-  var cache = {};
+  const cache = {};
   data.forEach((row) => {
     const v = accessor(row);
     cache[v] = v;
   });
-  any_def.categories = Object.keys(cache).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).map((cat, i) => ({
+  anyDef.categories = Object.keys(cache).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).map((cat, i) => ({
     name: cat,
     color: categoryColors[i] || 'gray'
   }));
@@ -237,9 +236,9 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
     return 0;
   }
   const categories = {};
-  var validSize = 0;
+  let validSize = 0;
   for (let i = 0; i < testSize; ++i) {
-    let v = accessor(data[i]);
+    const v = accessor(data[i]);
     if (v == null || v.trim().length === 0) {
       continue; //skip empty samples
     }
@@ -247,8 +246,8 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
     categories[v] = v;
   }
 
-  const num_cats = Object.keys(categories).length;
-  return 1 - num_cats / validSize;
+  const numCats = Object.keys(categories).length;
+  return 1 - numCats / validSize;
 }
 
 function parseCategorical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -288,12 +287,12 @@ export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinit
 
   return new Promise((resolve) => {
     const dialog = createDialog('Edit Numerical Range', 'numerical', () => {
-      const type_s = (<HTMLInputElement>dialog.body.querySelector('input[name=numerical-type]')).checked ? 'real' : 'int';
-      const min_r = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-min]')).value);
-      const max_r = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-max]')).value);
+      const typeS = (<HTMLInputElement>dialog.body.querySelector('input[name=numerical-type]')).checked ? 'real' : 'int';
+      const minR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-min]')).value);
+      const maxR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-max]')).value);
       dialog.hide();
-      definition.type = type_s;
-      (<any>definition).range = [min_r, max_r];
+      definition.type = typeS;
+      (<any>definition).range = [minR, maxR];
       resolve(definition);
     });
     dialog.body.innerHTML = `
@@ -324,26 +323,26 @@ function isMissingNumber(v: string) {
 
 export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   //TODO support different notations, comma vs point
-  const any_def: any = def;
-  if (typeof any_def.range !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.range !== 'undefined') {
     return def;
   }
-  var min_v = NaN;
-  var max_v = NaN;
+  let minV = NaN;
+  let maxV = NaN;
   data.forEach((row) => {
     const raw = accessor(row);
     if (isMissingNumber(raw)) {
       return; //skip
     }
     const v = parseFloat(raw);
-    if (isNaN(min_v) || v < min_v) {
-      min_v = v;
+    if (isNaN(minV) || v < minV) {
+      minV = v;
     }
-    if (isNaN(max_v) || v > max_v) {
-      max_v = v;
+    if (isNaN(maxV) || v > maxV) {
+      maxV = v;
     }
   });
-  any_def.range = [isNaN(min_v) ? 0: min_v, isNaN(max_v) ? 100 : max_v];
+  anyDef.range = [isNaN(minV) ? 0: minV, isNaN(maxV) ? 100 : maxV];
   return def;
 }
 
@@ -353,11 +352,11 @@ function isNumerical(name: string, index: number, data: any[], accessor: (row: a
     return 0;
   }
   const isFloat = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
-  var numNumerical = 0;
-  var validSize = 0;
+  let numNumerical = 0;
+  let validSize = 0;
 
   for (let i = 0; i < testSize; ++i) {
-    let v = accessor(data[i]);
+    const v = accessor(data[i]);
     if (isMissingNumber(v)) {
       continue; //skip empty samples
     }
@@ -450,9 +449,9 @@ export class ValueTypeEditor implements IValueTypeEditor {
 export function createCustomValueTypeEditor(name: string, id: string, implicit: boolean, desc: IValueTypeEditor) {
   return new ValueTypeEditor(<any>{
     desc: {
-      name: name,
-      id: id,
-      implicit: implicit
+      name,
+      id,
+      implicit
     },
     factory: ()=>desc
   });
@@ -506,9 +505,9 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   const testSize = Math.min(options.sampleSize, data.length);
 
   //compute guess results
-  var results = editors.map((editor) => ({
+  let results = editors.map((editor) => ({
     type: editor.id,
-    editor: editor,
+    editor,
     confidence: editor.isType(name, index, data, accessor, testSize),
     priority: editor.priority
   }));

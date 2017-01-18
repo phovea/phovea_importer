@@ -13,7 +13,7 @@ import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
 function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   const idtype = (<any>definition).idType || 'Custom';
   const existing = listidtypes();
-  const idtypes_list = existing.map((type) => `<option value="${type.id}" ${type.id === idtype ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n');
+  const idtypeList = existing.map((type) => `<option value="${type.id}" ${type.id === idtype ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n');
 
   return new Promise((resolve) => {
     const dialog = createDialog('Edit IDType', 'idtype', () => {
@@ -29,7 +29,7 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
           <label for="idType">IDType</label>
           <select id="idType" class="form-control">
             <option value=""></option>
-            ${idtypes_list} 
+            ${idtypeList} 
           </select>
         </div>
         <div class="form-group">
@@ -38,7 +38,7 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
         </div>
     `;
     (<HTMLSelectElement>(dialog.body.querySelector('select'))).addEventListener('change', function (e) {
-      (<HTMLInputElement>(dialog.body.querySelector('input'))).disabled = this.selectedIndex !== 0;
+      (<HTMLInputElement>(dialog.body.querySelector('input'))).disabled = (<HTMLSelectElement>this).selectedIndex !== 0;
     });
 
     dialog.show();
@@ -46,11 +46,11 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
 }
 
 function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
-  const any_def: any = def;
-  if (typeof any_def.idType !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.idType !== 'undefined') {
     return def;
   }
-  any_def.idType = 'Custom';
+  anyDef.idType = 'Custom';
   //TODO
   return def;
 }
