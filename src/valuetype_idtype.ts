@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {list as listidtypes} from 'phovea_core/src/idtype';
+import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
 import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
 
 /**
@@ -12,7 +12,7 @@ import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
  */
 function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   const idtype = (<any>definition).idType || 'Custom';
-  const existing = listidtypes();
+  const existing = listidtypes().filter((d) => !isInternalIDType(d));
   const idtypeList = existing.map((type) => `<option value="${type.id}" ${type.id === idtype ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n');
 
   return new Promise((resolve) => {
