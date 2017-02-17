@@ -3,6 +3,7 @@
  */
 
 import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
+import {getAPIJSON, api2absURL} from 'phovea_core/src/ajax';
 import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
 
 /**
@@ -64,8 +65,10 @@ function isIDType(name: string, index: number, data: any[], accessor: (row: any)
 
   let foundIDTypes = 0;
   let validSize = 0;
+  const values = [];
+
   for(let i = 0; i < testSize; ++i) {
-    let v = accessor(data[i]);
+    const v = accessor(data[i]);
 
     if (v == null || v.trim().length === 0) {
       continue; //skip empty samples
@@ -74,10 +77,25 @@ function isIDType(name: string, index: number, data: any[], accessor: (row: any)
     if(v.indexOf('ENSG') >= 0) {
       ++foundIDTypes;
     }
+    values.push(v);
     ++validSize;
   }
 
-  return foundIDTypes / validSize;
+  if(foundIDTypes) {
+    return foundIDTypes / validSize;
+  }
+
+  const param = {
+    entity_name: 'celllinename',
+    schema: 'cellline',
+    table_name: 'cellline',
+    query: `'${values.join('\',\'')}'`
+  };
+
+  getAPIJSON('/targid/db/bioinfodb/check_id_types', param).then((result) => {
+    console.log('RESULT', result);
+    console.log('TEST', result[0].matches / validSize);
+  }, (reason) => console.error('Could not fetch', reason));
 }
 
 function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
