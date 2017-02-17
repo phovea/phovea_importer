@@ -37,7 +37,7 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
           <input type="text" class="form-control" id="idType_new" value="${existing.some((i) => i.id === idtype) ? '' : idtype}">
         </div>
     `;
-    (<HTMLSelectElement>(dialog.body.querySelector('select'))).addEventListener('change', function (e) {
+    (<HTMLSelectElement>(dialog.body.querySelector('select'))).addEventListener('change', (e) => {
       (<HTMLInputElement>(dialog.body.querySelector('input'))).disabled = this.selectedIndex !== 0;
     });
 
@@ -57,7 +57,27 @@ function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: any) => 
 
 function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
   //TODO guess the first one is it most of the times
-  return index === 0 ? 0.5 : 0;
+  const testSize = Math.min(data.length, sampleSize);
+  if (testSize <= 0) {
+    return 0;
+  }
+
+  let foundIDTypes = 0;
+  let validSize = 0;
+  for(let i = 0; i < testSize; ++i) {
+    let v = accessor(data[i]);
+
+    if (v == null || v.trim().length === 0) {
+      continue; //skip empty samples
+    }
+
+    if(v.indexOf('ENSG') >= 0) {
+      ++foundIDTypes;
+    }
+    ++validSize;
+  }
+
+  return foundIDTypes / validSize;
 }
 
 function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {

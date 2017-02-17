@@ -49,7 +49,7 @@ export function createDialog(title: string, classSuffix: string, onSubmit: ()=>a
   dialog.body.classList.add('caleydo-importer-' + classSuffix);
   const form = document.createElement('form');
   dialog.body.appendChild(form);
-  dialog.body = form;
+  //dialog.body = form;
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     onSubmit();
@@ -201,7 +201,7 @@ function editCategorical(definition: ITypeDefinition) {
     `;
     const textarea = dialog.body.querySelector('textarea');
     //http://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea#6637396 enable tab character
-    textarea.addEventListener('keydown', function (e: KeyboardEvent) {
+    textarea.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.keyCode === 9 || e.which === 9) {
         e.preventDefault();
         var s = this.selectionStart;
