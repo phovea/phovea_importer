@@ -24,7 +24,7 @@ export interface IValueTypeEditor {
    * @param sampleSize
    * @return the confidence (0 ... not, 1 ... sure) that this is the right value type
    */
-  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): number;
+  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): Promise<number>;
   /**
    * parses the given value and updates them inplace
    * @return an array containing invalid indices
@@ -167,7 +167,7 @@ function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, val
 
 export function string_(): IValueTypeEditor {
   return {
-    isType: () => 1, //always a string
+    isType: () => Promise.resolve(1), //always a string
     parse: parseString,
     guessOptions: (d) => guessString,
     edit: editString
@@ -233,7 +233,7 @@ function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any
 function isCategorical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
   const testSize = Math.min(data.length, sampleSize);
   if (testSize <= 0) {
-    return 0;
+    return Promise.resolve(0);
   }
   const categories = {};
   let validSize = 0;
@@ -247,7 +247,7 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
   }
 
   const numCats = Object.keys(categories).length;
-  return 1 - numCats / validSize;
+  return Promise.resolve(1 - numCats / validSize);
 }
 
 function parseCategorical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -349,7 +349,7 @@ export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row
 function isNumerical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
   const testSize = Math.min(data.length, sampleSize);
   if (testSize <= 0) {
-    return 0;
+    return Promise.resolve(0);
   }
   const isFloat = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
   let numNumerical = 0;
@@ -365,7 +365,7 @@ function isNumerical(name: string, index: number, data: any[], accessor: (row: a
       numNumerical += 1;
     }
   }
-  return numNumerical / validSize;
+  return Promise.resolve(numNumerical / validSize);
 }
 
 function parseNumerical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -494,33 +494,65 @@ export interface IGuessOptions {
  * @param options additional options
  * @return {any}
  */
-export function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): ValueTypeEditor {
+export function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): Promise<ValueTypeEditor> {
   options = mixin({
     sampleSize: 100,
     thresholds: <any>{
       numerical: 0.7,
-      categorical: 0.7
+      categorical: 0.7,
+      real: 0.7,
+      int: 0.7
     }
   }, options);
   const testSize = Math.min(options.sampleSize, data.length);
 
-  //compute guess results
-  let results = editors.map((editor) => ({
-    type: editor.id,
-    editor,
-    confidence: editor.isType(name, index, data, accessor, testSize),
-    priority: editor.priority
-  }));
-  //filter all 0 confidence ones by its threshold
-  results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
+  // one promise for each editor for a given column
+  const promises = editors.map((editor) => {
+    return editor.isType(name, index, data, accessor, testSize);
+  });
 
-  if (results.length <= 0) {
-    return null;
-  }
-  //order by priority (less more important)
-  results = results.sort((a, b) => a.priority - b.priority);
-  //choose the first one
-  return results[0].editor;
+  return Promise.all(promises).then((confidenceValues) => {
+    console.log(name, confidenceValues);
+    let results = editors.map((editor, i) => ({
+      type: editor.id,
+      editor,
+      confidence: confidenceValues[i],
+      priority: editor.priority
+    }));
+
+    //filter all 0 confidence ones by its threshold
+    results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
+
+    if (results.length <= 0) {
+      return null;
+    }
+    //order by priority (less more important)
+    results = results.sort((a, b) => a.priority - b.priority);
+    //choose the first one
+    console.log(name, results[0].editor);
+    console.log('END', results);
+    return results[0].editor;
+  });
+
+
+
+  // //compute guess results
+  // let results = editors.map((editor) => ({
+  //   type: editor.id,
+  //   editor,
+  //   confidence: 0,
+  //   priority: editor.priority
+  // }));
+  // //filter all 0 confidence ones by its threshold
+  // results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
+  //
+  // if (results.length <= 0) {
+  //   return null;
+  // }
+  // //order by priority (less more important)
+  // results = results.sort((a, b) => a.priority - b.priority);
+  // //choose the first one
+  // return results[0].editor;
 }
 
 export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true) {

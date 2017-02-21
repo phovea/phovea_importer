@@ -3,8 +3,8 @@
  */
 
 import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
-import {getAPIJSON, api2absURL} from 'phovea_core/src/ajax';
 import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
+import * as plugins from 'phovea_core/src/plugin';
 
 /**
  * edits the given type definition in place with idtype properties
@@ -56,46 +56,19 @@ function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: any) => 
   return def;
 }
 
-function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
-  //TODO guess the first one is it most of the times
-  const testSize = Math.min(data.length, sampleSize);
-  if (testSize <= 0) {
-    return 0;
-  }
+async function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
+  const pluginPromises: Promise<number>[] = [];
+  plugins.list('idTypeDetector').forEach((pluginDesc) => {
+    pluginPromises.push(pluginDesc.load().then((factory) => {
+      const plugin = factory.factory();
+      return plugin.detectIDType(data, accessor, sampleSize);
+    }));
+  });
 
-  let foundIDTypes = 0;
-  let validSize = 0;
-  const values = [];
-
-  for(let i = 0; i < testSize; ++i) {
-    const v = accessor(data[i]);
-
-    if (v == null || v.trim().length === 0) {
-      continue; //skip empty samples
-    }
-
-    if(v.indexOf('ENSG') >= 0) {
-      ++foundIDTypes;
-    }
-    values.push(v);
-    ++validSize;
-  }
-
-  if(foundIDTypes) {
-    return foundIDTypes / validSize;
-  }
-
-  const param = {
-    entity_name: 'celllinename',
-    schema: 'cellline',
-    table_name: 'cellline',
-    query: `'${values.join('\',\'')}'`
-  };
-
-  getAPIJSON('/targid/db/bioinfodb/check_id_types', param).then((result) => {
-    console.log('RESULT', result);
-    console.log('TEST', result[0].matches / validSize);
-  }, (reason) => console.error('Could not fetch', reason));
+  const values = await Promise.all(pluginPromises);
+  console.log('V', values);
+  console.log(name, Math.max(...values));
+  return Math.max(...values) / 2;
 }
 
 function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {

@@ -46,36 +46,44 @@ export function importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>
         </tbody>
       </table>
     `);
-  const config = header.map((name, i) => ({
-    column: i,
-    name,
-    editor: guessValueType(editors, name, i, data, (row) => row[i], i),
-    value: {
-      type: null
-    }
-  }));
 
-  const $rows = $root.select('tbody').selectAll('tr').data(config);
-
-  const $rowsEnter = $rows.enter().append('tr')
-    .html((d) => `
-      <td>
-        <input type="input" class="form-control" value="${d.name}">
-      </td>
-      <td class="input-group">
-          ${createTypeEditor(editors, d.editor)}
-      </td>`);
-  $rowsEnter.select('input').on('change', function (d) {
-    d.name = this.value;
+  const configPromises = header.map((name, i) => {
+    return guessValueType(editors, name, i, data, (row) => row[i], i);
   });
-  $rowsEnter.select('select').on('change', updateType(editors));
-  $rowsEnter.select('button').on('click', (d) => {
-    d.editor.guessOptions(d.value, data, (row) => row[d.column]);
-    d.editor.edit(d.value);
-  });
-  const common = extractCommonFields($root);
 
-  return () => ({data, desc: toTableDataDescription(config, data, common)});
+  return Promise.all(configPromises).then((guessedEditors) => {
+    const config = header.map((name, i) => ({
+      column: i,
+      name,
+      editor: guessedEditors[i],
+      value: {
+        type: null
+      }
+    }));
+
+    const $rows = $root.select('tbody').selectAll('tr').data(config);
+
+    const $rowsEnter = $rows.enter().append('tr')
+      .html((d) => `
+        <td>
+          <input type="input" class="form-control" value="${d.name}">
+        </td>
+        <td class="input-group">
+            ${createTypeEditor(editors, d.editor)}
+        </td>`);
+    $rowsEnter.select('input').on('change', function (d) {
+      d.name = this.value;
+    });
+    $rowsEnter.select('select').on('change', updateType(editors));
+    $rowsEnter.select('button').on('click', (d) => {
+      d.editor.guessOptions(d.value, data, (row) => row[d.column]);
+      d.editor.edit(d.value);
+    });
+    const common = extractCommonFields($root);
+
+    return () => ({data, desc: toTableDataDescription(config, data, common)});
+  });
+
 }
 
 function getCurrentUser() {
@@ -142,71 +150,74 @@ export function importMatrix(editors: ValueTypeEditor[], $root: d3.Selection<any
     }
   }
 
-  const configs = [{
-    column: -1,
-    name: 'Row ID Type',
-    value: {
-      type: 'idType'
-    },
-    editor: editors.filter((e) => e.id === 'idType')[0]
-  }, {
-    column: -1,
-    name: 'Column ID Type',
-    value: {
-      type: 'idType'
-    },
-    editor: editors.filter((e) => e.id === 'idType')[0]
-  }, {
-    column: -1,
-    name: 'value',
-    value: {
-      type: null
-    },
-    editor: guessValueType(editors, 'value', -1, dataRange, byIndex)
-  }];
+  const promise = guessValueType(editors, 'value', -1, dataRange, byIndex);
+  return promise.then((editor) => {
+    const configs = [{
+      column: -1,
+      name: 'Row ID Type',
+      value: {
+        type: 'idType'
+      },
+      editor: editors.filter((e) => e.id === 'idType')[0]
+    }, {
+      column: -1,
+      name: 'Column ID Type',
+      value: {
+        type: 'idType'
+      },
+      editor: editors.filter((e) => e.id === 'idType')[0]
+    }, {
+      column: -1,
+      name: 'value',
+      value: {
+        type: null
+      },
+      editor
+    }];
 
-  const $rows = $root.html(commonFields(name)).selectAll('div.field').data(configs);
-  $rows.enter().append('div').classed('form-group', true).html((d, i) => `
-        <label for="${prefix}_${i}">${d.name}</label>
-        <div class="input-group">
-          <select class="form-control" ${i < 2 ? 'disabled="disabled"' : ''} id="${prefix}_${i}">
-            ${editors.map((editor) => `<option value="${editor.id}" ${d.value.type === editor.id ? 'selected="selected"' : ''}>${editor.name}</option>`).join('\n')}
-          </select>
-          <span class="input-group-btn"><button class="btn btn-secondary" ${!d.editor.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button></span>
-        </div>`);
+    const $rows = $root.html(commonFields(name)).selectAll('div.field').data(configs);
+    $rows.enter().append('div').classed('form-group', true).html((d, i) => `
+          <label for="${prefix}_${i}">${d.name}</label>
+          <div class="input-group">
+            <select class="form-control" ${i < 2 ? 'disabled="disabled"' : ''} id="${prefix}_${i}">
+              ${editors.map((editor) => `<option value="${editor.id}" ${d.value.type === editor.id ? 'selected="selected"' : ''}>${editor.name}</option>`).join('\n')}
+            </select>
+            <span class="input-group-btn"><button class="btn btn-secondary" ${!d.editor.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button></span>
+          </div>`);
 
-  $rows.select('select').on('change', updateType(editors, false));
-  $rows.select('button').on('click', (d, i) => {
-    if (i < 2) {
-      d.editor.guessOptions(d.value, i === 0 ? rows : cols, identity);
-    } else {
-      d.editor.guessOptions(d.value, dataRange, byIndex);
-    }
-    d.editor.edit(d.value);
+    $rows.select('select').on('change', updateType(editors, false));
+    $rows.select('button').on('click', (d, i) => {
+      if (i < 2) {
+        d.editor.guessOptions(d.value, i === 0 ? rows : cols, identity);
+      } else {
+        d.editor.guessOptions(d.value, dataRange, byIndex);
+      }
+      d.editor.edit(d.value);
+    });
+
+    //parse data
+    //TODO set rows and cols
+    configs[0].editor.parse(configs[0].value, rows, identity);
+    configs[1].editor.parse(configs[1].value, cols, identity);
+    configs[2].editor.parse(configs[2].value, dataRange, byIndex);
+
+
+    const common = extractCommonFields($root);
+
+    const desc: IDataDescription = {
+      type: 'matrix',
+      id: fixId(common.name + randomId(3)),
+      name: common.name,
+      fqname: 'upload/' + common.name,
+      creator: getCurrentUser(),
+      ts: Date.now(),
+      description: common.description,
+      size: [rows.length, cols.length],
+      rowtype: (<any>configs[0]).value.idType,
+      coltype: (<any>configs[1]).value.idType,
+      value: configs[1].value
+    };
+
+    return () => ({rows, cols, data, desc});
   });
-
-  //parse data
-  //TODO set rows and cols
-  configs[0].editor.parse(configs[0].value, rows, identity);
-  configs[1].editor.parse(configs[1].value, cols, identity);
-  configs[2].editor.parse(configs[2].value, dataRange, byIndex);
-
-
-  const common = extractCommonFields($root);
-
-  const desc: IDataDescription = {
-    type: 'matrix',
-    id: fixId(common.name + randomId(3)),
-    name: common.name,
-    fqname: 'upload/' + common.name,
-    creator: getCurrentUser(),
-    ts: Date.now(),
-    description: common.description,
-    size: [rows.length, cols.length],
-    rowtype: (<any>configs[0]).value.idType,
-    coltype: (<any>configs[1]).value.idType,
-    value: configs[1].value
-  };
-
-  return () => ({rows, cols, data, desc});
 }
