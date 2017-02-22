@@ -507,9 +507,7 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   const testSize = Math.min(options.sampleSize, data.length);
 
   // one promise for each editor for a given column
-  const promises = editors.map((editor) => {
-    return editor.isType(name, index, data, accessor, testSize);
-  });
+  const promises = editors.map((editor) => editor.isType(name, index, data, accessor, testSize));
 
   return Promise.all(promises).then((confidenceValues) => {
     let results = editors.map((editor, i) => ({

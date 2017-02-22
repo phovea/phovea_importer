@@ -34,7 +34,7 @@ function extractCommonFields($root: d3.Selection<any>) {
   };
 }
 
-export function importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
+export async function importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
   $root.html(`${commonFields(name)}
       <table class="table table-striped table-condensed">
         <thead>
@@ -51,39 +51,37 @@ export function importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>
     return guessValueType(editors, name, i, data, (row) => row[i], i);
   });
 
-  return Promise.all(configPromises).then((guessedEditors) => {
-    const config = header.map((name, i) => ({
-      column: i,
-      name,
-      editor: guessedEditors[i],
-      value: {
-        type: null
-      }
-    }));
+  const guessedEditors = await Promise.all(configPromises);
+  const config = header.map((name, i) => ({
+    column: i,
+    name,
+    editor: guessedEditors[i],
+    value: {
+      type: null
+    }
+  }));
 
-    const $rows = $root.select('tbody').selectAll('tr').data(config);
+  const $rows = $root.select('tbody').selectAll('tr').data(config);
 
-    const $rowsEnter = $rows.enter().append('tr')
-      .html((d) => `
-        <td>
-          <input type="input" class="form-control" value="${d.name}">
-        </td>
-        <td class="input-group">
-            ${createTypeEditor(editors, d.editor)}
-        </td>`);
-    $rowsEnter.select('input').on('change', function (d) {
-      d.name = this.value;
-    });
-    $rowsEnter.select('select').on('change', updateType(editors));
-    $rowsEnter.select('button').on('click', (d) => {
-      d.editor.guessOptions(d.value, data, (row) => row[d.column]);
-      d.editor.edit(d.value);
-    });
-    const common = extractCommonFields($root);
-
-    return () => ({data, desc: toTableDataDescription(config, data, common)});
+  const $rowsEnter = $rows.enter().append('tr')
+    .html((d) => `
+      <td>
+        <input type="input" class="form-control" value="${d.name}">
+      </td>
+      <td class="input-group">
+          ${createTypeEditor(editors, d.editor)}
+      </td>`);
+  $rowsEnter.select('input').on('change', function (d) {
+    d.name = this.value;
   });
+  $rowsEnter.select('select').on('change', updateType(editors));
+  $rowsEnter.select('button').on('click', (d) => {
+    d.editor.guessOptions(d.value, data, (row) => row[d.column]);
+    d.editor.edit(d.value);
+  });
+  const common = extractCommonFields($root);
 
+  return () => ({data, desc: toTableDataDescription(config, data, common)});
 }
 
 function getCurrentUser() {
