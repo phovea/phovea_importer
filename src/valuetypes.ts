@@ -36,7 +36,7 @@ export interface IValueTypeEditor {
    * @param data
    * @param accessor
    */
-  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any);
+  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any): Promise<ITypeDefinition>;
   /**
    * opens and editor to edit the options
    * @param def
@@ -133,10 +133,10 @@ function editString(definition: ITypeDefinition) {
 function guessString(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   const anyDef: any = def;
   if (typeof anyDef.convert !== 'undefined') {
-    return def;
+    return Promise.resolve(def);
   }
   anyDef.convert = null;
-  return def;
+  return Promise.resolve(def);
 }
 
 function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -169,7 +169,7 @@ export function string_(): IValueTypeEditor {
   return {
     isType: () => Promise.resolve(1), //always a string
     parse: parseString,
-    guessOptions: (d) => guessString,
+    guessOptions: guessString,
     edit: editString
   };
 }
@@ -215,7 +215,7 @@ function editCategorical(definition: ITypeDefinition) {
 function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   const anyDef: any = def;
   if (typeof anyDef.categories !== 'undefined') {
-    return def;
+    return Promise.resolve(def);
   }
   //unique values
   const cache = {};
@@ -227,7 +227,7 @@ function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any
     name: cat,
     color: categoryColors[i] || 'gray'
   }));
-  return def;
+  return Promise.resolve(def);
 }
 
 function isCategorical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
@@ -325,7 +325,7 @@ export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row
   //TODO support different notations, comma vs point
   const anyDef: any = def;
   if (typeof anyDef.range !== 'undefined') {
-    return def;
+    return Promise.resolve(def);
   }
   let minV = NaN;
   let maxV = NaN;
@@ -343,7 +343,7 @@ export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row
     }
   });
   anyDef.range = [isNaN(minV) ? 0: minV, isNaN(maxV) ? 100 : maxV];
-  return def;
+  return Promise.resolve(def);
 }
 
 function isNumerical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
@@ -530,26 +530,6 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
     //choose the first one
     return results[0].editor;
   });
-
-
-
-  // //compute guess results
-  // let results = editors.map((editor) => ({
-  //   type: editor.id,
-  //   editor,
-  //   confidence: 0,
-  //   priority: editor.priority
-  // }));
-  // //filter all 0 confidence ones by its threshold
-  // results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
-  //
-  // if (results.length <= 0) {
-  //   return null;
-  // }
-  // //order by priority (less more important)
-  // results = results.sort((a, b) => a.priority - b.priority);
-  // //choose the first one
-  // return results[0].editor;
 }
 
 export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true) {

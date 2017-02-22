@@ -46,27 +46,45 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   });
 }
 
-function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
+async function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   const anyDef: any = def;
   if (typeof anyDef.idType !== 'undefined') {
     return def;
   }
-  anyDef.idType = 'Custom';
-  //TODO
+
+  const pluginPromise = executePlugins(data, accessor, Math.min(data.length, 100));
+  const {idTypes, results} = await pluginPromise;
+
+  const maxConfidence = Math.max(...results);
+
+  anyDef.idType = maxConfidence > 0.7? idTypes[results.indexOf(maxConfidence)] : 'Custom';
+
   return def;
 }
 
 async function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
+  const pluginPromise = executePlugins(data, accessor, sampleSize);
+
+  const {results} = await pluginPromise;
+  return Math.max(...results);
+}
+
+async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number) {
   const pluginPromises: Promise<number>[] = [];
+  const idTypes: string[] = [];
   plugins.list('idTypeDetector').forEach((pluginDesc) => {
+    idTypes.push(pluginDesc.idType);
     pluginPromises.push(pluginDesc.load().then((factory) => {
       const plugin = factory.factory();
       return plugin.detectIDType(data, accessor, sampleSize);
     }));
   });
 
-  const values = await Promise.all(pluginPromises);
-  return Math.max(...values) / 2;
+  const results = await Promise.all(pluginPromises);
+  return {
+    idTypes,
+    results
+  };
 }
 
 function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
