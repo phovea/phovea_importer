@@ -532,8 +532,8 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   });
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: any = null) {
-  const type = current.name === 'IDType'? ` (${idType.idType})` : '';
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: {type: string, idType: string} = null) {
+  const type = (idType && current.name === 'IDType')? ` (${idType.idType})` : '';
   return `
   <select class='form-control'>
           ${emptyOne? '<option value=""></option>':''}
