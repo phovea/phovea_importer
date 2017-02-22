@@ -532,12 +532,11 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   });
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: {type: string, idType: string} = null) {
-  const type = (idType && current.name === 'IDType')? ` (${idType.idType})` : '';
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: string = '') {
   return `
   <select class='form-control'>
           ${emptyOne? '<option value=""></option>':''}
-          ${editors.map((editor) => `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name}${type}</option>`).join('\n')}
+          ${editors.map((editor) => `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name} ${current && current.id === editor.id && current.name === 'IDType' ? `(${idType})` : ''}</option>`).join('\n')}
         </select>
         <span class="input-group-btn">
           <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>

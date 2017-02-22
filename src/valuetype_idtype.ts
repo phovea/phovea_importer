@@ -4,7 +4,7 @@
 
 import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
 import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
-import * as plugins from 'phovea_core/src/plugin';
+import {list} from 'phovea_core/src/plugin';
 
 /**
  * edits the given type definition in place with idtype properties
@@ -72,7 +72,7 @@ async function isIDType(name: string, index: number, data: any[], accessor: (row
 async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number) {
   const pluginPromises: Promise<number>[] = [];
   const idTypes: string[] = [];
-  plugins.list('idTypeDetector').forEach((pluginDesc) => {
+  list('idTypeDetector').forEach((pluginDesc) => {
     idTypes.push(pluginDesc.idType);
     pluginPromises.push(pluginDesc.load().then((factory) => {
       const plugin = factory.factory();
