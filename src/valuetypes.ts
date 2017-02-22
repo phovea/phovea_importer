@@ -512,7 +512,6 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   });
 
   return Promise.all(promises).then((confidenceValues) => {
-    console.log(name, confidenceValues);
     let results = editors.map((editor, i) => ({
       type: editor.id,
       editor,
@@ -529,8 +528,6 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
     //order by priority (less more important)
     results = results.sort((a, b) => a.priority - b.priority);
     //choose the first one
-    console.log(name, results[0].editor);
-    console.log('END', results);
     return results[0].editor;
   });
 

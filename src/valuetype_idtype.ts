@@ -66,8 +66,6 @@ async function isIDType(name: string, index: number, data: any[], accessor: (row
   });
 
   const values = await Promise.all(pluginPromises);
-  console.log('V', values);
-  console.log(name, Math.max(...values));
   return Math.max(...values) / 2;
 }
 
