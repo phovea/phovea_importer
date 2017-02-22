@@ -24,7 +24,7 @@ export interface IValueTypeEditor {
    * @param sampleSize
    * @return the confidence (0 ... not, 1 ... sure) that this is the right value type
    */
-  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): Promise<number>;
+  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): Promise<number>|number;
   /**
    * parses the given value and updates them inplace
    * @return an array containing invalid indices
@@ -36,7 +36,7 @@ export interface IValueTypeEditor {
    * @param data
    * @param accessor
    */
-  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any): Promise<ITypeDefinition>;
+  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any): Promise<ITypeDefinition>|ITypeDefinition;
   /**
    * opens and editor to edit the options
    * @param def
@@ -133,10 +133,10 @@ function editString(definition: ITypeDefinition) {
 function guessString(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   const anyDef: any = def;
   if (typeof anyDef.convert !== 'undefined') {
-    return Promise.resolve(def);
+    return def;
   }
   anyDef.convert = null;
-  return Promise.resolve(def);
+  return def;
 }
 
 function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -167,7 +167,7 @@ function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, val
 
 export function string_(): IValueTypeEditor {
   return {
-    isType: () => Promise.resolve(1), //always a string
+    isType: () => 1, //always a string
     parse: parseString,
     guessOptions: guessString,
     edit: editString
@@ -215,7 +215,7 @@ function editCategorical(definition: ITypeDefinition) {
 function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   const anyDef: any = def;
   if (typeof anyDef.categories !== 'undefined') {
-    return Promise.resolve(def);
+    return def;
   }
   //unique values
   const cache = {};
@@ -227,13 +227,13 @@ function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any
     name: cat,
     color: categoryColors[i] || 'gray'
   }));
-  return Promise.resolve(def);
+  return def;
 }
 
 function isCategorical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
   const testSize = Math.min(data.length, sampleSize);
   if (testSize <= 0) {
-    return Promise.resolve(0);
+    return 0;
   }
   const categories = {};
   let validSize = 0;
@@ -247,7 +247,7 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
   }
 
   const numCats = Object.keys(categories).length;
-  return Promise.resolve(1 - numCats / validSize);
+  return 1 - numCats / validSize;
 }
 
 function parseCategorical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -325,7 +325,7 @@ export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row
   //TODO support different notations, comma vs point
   const anyDef: any = def;
   if (typeof anyDef.range !== 'undefined') {
-    return Promise.resolve(def);
+    return def;
   }
   let minV = NaN;
   let maxV = NaN;
@@ -343,13 +343,13 @@ export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row
     }
   });
   anyDef.range = [isNaN(minV) ? 0: minV, isNaN(maxV) ? 100 : maxV];
-  return Promise.resolve(def);
+  return def;
 }
 
 function isNumerical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
   const testSize = Math.min(data.length, sampleSize);
   if (testSize <= 0) {
-    return Promise.resolve(0);
+    return 0;
   }
   const isFloat = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
   let numNumerical = 0;
@@ -365,7 +365,7 @@ function isNumerical(name: string, index: number, data: any[], accessor: (row: a
       numNumerical += 1;
     }
   }
-  return Promise.resolve(numNumerical / validSize);
+  return numNumerical / validSize;
 }
 
 function parseNumerical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -426,7 +426,7 @@ export class ValueTypeEditor implements IValueTypeEditor {
   }
 
   isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
-    return this.impl.isType(name, index, data, accessor, sampleSize);
+    return Promise.resolve(this.impl.isType(name, index, data, accessor, sampleSize));
   };
 
   parse(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => any): number[] {
@@ -437,7 +437,7 @@ export class ValueTypeEditor implements IValueTypeEditor {
 
   guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any) {
     def.type = this.id;
-    return this.impl.guessOptions(def, data, accessor);
+    return Promise.resolve(this.impl.guessOptions(def, data, accessor));
   }
 
   edit(def: ITypeDefinition) {
