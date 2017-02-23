@@ -11,6 +11,14 @@ import {list} from 'phovea_core/src/plugin';
  * @param definition call by reference argument
  * @return {Promise<R>|Promise}
  */
+
+const EXTENSION_POINT = 'idTypeDetector';
+
+export interface IIDTypeDetector {
+  detectIDType: (data: any[], accessor: (row: any) => string, sampleSize: number) => Promise<number>|number;
+}
+
+
 function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   const idtype = (<any>definition).idType || 'Custom';
   const existing = listidtypes().filter((d) => !isInternalIDType(d));
@@ -72,10 +80,10 @@ async function isIDType(name: string, index: number, data: any[], accessor: (row
 async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number) {
   const pluginPromises: Promise<number>[] = [];
   const idTypes: string[] = [];
-  list('idTypeDetector').forEach((pluginDesc) => {
+  list(EXTENSION_POINT).forEach((pluginDesc) => {
     idTypes.push(pluginDesc.idType);
     pluginPromises.push(pluginDesc.load().then((factory) => {
-      const plugin = factory.factory();
+      const plugin: IIDTypeDetector = factory.factory();
       return plugin.detectIDType(data, accessor, sampleSize);
     }));
   });
