@@ -15,7 +15,7 @@ import {list} from 'phovea_core/src/plugin';
 const EXTENSION_POINT = 'idTypeDetector';
 
 export interface IIDTypeDetector {
-  detectIDType: (data: any[], accessor: (row: any) => string, sampleSize: number) => Promise<number>|number;
+  detectIDType: (data: any[], accessor: (row: any) => string, sampleSize: number, options?: {[property: string]: any}) => Promise<number>|number;
 }
 
 interface IPluginResult {
@@ -88,8 +88,9 @@ async function isIDType(name: string, index: number, data: any[], accessor: (row
 async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number) {
   const results = list(EXTENSION_POINT).map( async (pluginDesc) => {
     const factory = await pluginDesc.load();
+    const options = pluginDesc.options? pluginDesc.options : null;
     const plugin: IIDTypeDetector = factory.factory();
-    const confidence = await plugin.detectIDType(data, accessor, sampleSize);
+    const confidence = await plugin.detectIDType(data, accessor, sampleSize, options);
     return {
       idType: pluginDesc.idType,
       confidence
