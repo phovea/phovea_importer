@@ -426,7 +426,7 @@ export class ValueTypeEditor implements IValueTypeEditor {
   }
 
   isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
-    return Promise.resolve(this.impl.isType(name, index, data, accessor, sampleSize));
+    return this.impl.isType(name, index, data, accessor, sampleSize);
   };
 
   parse(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => any): number[] {
@@ -437,7 +437,7 @@ export class ValueTypeEditor implements IValueTypeEditor {
 
   guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any) {
     def.type = this.id;
-    return Promise.resolve(this.impl.guessOptions(def, data, accessor));
+    return this.impl.guessOptions(def, data, accessor);
   }
 
   edit(def: ITypeDefinition) {
@@ -494,7 +494,7 @@ export interface IGuessOptions {
  * @param options additional options
  * @return {any}
  */
-export function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): Promise<ValueTypeEditor> {
+export async function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): Promise<ValueTypeEditor> {
   options = mixin({
     sampleSize: 100,
     thresholds: <any>{
@@ -509,25 +509,25 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   // one promise for each editor for a given column
   const promises = editors.map((editor) => editor.isType(name, index, data, accessor, testSize));
 
-  return Promise.all(promises).then((confidenceValues) => {
-    let results = editors.map((editor, i) => ({
-      type: editor.id,
-      editor,
-      confidence: confidenceValues[i],
-      priority: editor.priority
-    }));
+  const confidenceValues = await Promise.all(promises);
 
-    //filter all 0 confidence ones by its threshold
-    results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
+  let results = editors.map((editor, i) => ({
+    type: editor.id,
+    editor,
+    confidence: confidenceValues[i],
+    priority: editor.priority
+  }));
 
-    if (results.length <= 0) {
-      return null;
-    }
-    //order by priority (less more important)
-    results = results.sort((a, b) => a.priority - b.priority);
-    //choose the first one
-    return results[0].editor;
-  });
+  //filter all 0 confidence ones by its threshold
+  results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
+
+  if (results.length <= 0) {
+    return null;
+  }
+  //order by priority (less more important)
+  results = results.sort((a, b) => a.priority - b.priority);
+  //choose the first one
+  return results[0].editor;
 }
 
 export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: string = '') {
