@@ -18,6 +18,11 @@ export interface IIDTypeDetector {
   detectIDType: (data: any[], accessor: (row: any) => string, sampleSize: number) => Promise<number>|number;
 }
 
+interface IPluginResult {
+  idType: string;
+  confidence: number;
+}
+
 
 function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   const idtype = (<any>definition).idType || 'Custom';
@@ -61,38 +66,37 @@ async function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: an
   }
 
   const pluginPromise = executePlugins(data, accessor, Math.min(data.length, 100));
-  const {idTypes, results} = await pluginPromise;
+  const results = await pluginPromise;
+  const confidences = results.map((result) => result.confidence);
 
-  const maxConfidence = Math.max(...results);
+  const maxConfidence = Math.max(...confidences);
 
-  anyDef.idType = maxConfidence > 0.7? idTypes[results.indexOf(maxConfidence)] : 'Custom';
+  anyDef.idType = maxConfidence > 0.7? results[confidences.indexOf(maxConfidence)].idType : 'Custom';
 
   return def;
 }
 
 async function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
   const pluginPromise = executePlugins(data, accessor, sampleSize);
+  const results = await pluginPromise;
 
-  const {results} = await pluginPromise;
-  return Math.max(...results);
+  const confidences = results.map((result) => result.confidence);
+
+  return Math.max(...confidences);
 }
 
 async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number) {
-  const pluginPromises: Promise<number>[] = [];
-  const idTypes: string[] = [];
-  list(EXTENSION_POINT).forEach((pluginDesc) => {
-    idTypes.push(pluginDesc.idType);
-    pluginPromises.push(pluginDesc.load().then((factory) => {
-      const plugin: IIDTypeDetector = factory.factory();
-      return plugin.detectIDType(data, accessor, sampleSize);
-    }));
+  const results = list(EXTENSION_POINT).map( async (pluginDesc) => {
+    const factory = await pluginDesc.load();
+    const plugin: IIDTypeDetector = factory.factory();
+    const confidence = await plugin.detectIDType(data, accessor, sampleSize);
+    return {
+      idType: pluginDesc.idType,
+      confidence
+    };
   });
 
-  const results = await Promise.all(pluginPromises);
-  return {
-    idTypes,
-    results
-  };
+  return await Promise.all(results);
 }
 
 function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
