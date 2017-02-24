@@ -24,7 +24,7 @@ export interface IValueTypeEditor {
    * @param sampleSize
    * @return the confidence (0 ... not, 1 ... sure) that this is the right value type
    */
-  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): number;
+  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): Promise<number>|number;
   /**
    * parses the given value and updates them inplace
    * @return an array containing invalid indices
@@ -36,7 +36,7 @@ export interface IValueTypeEditor {
    * @param data
    * @param accessor
    */
-  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any);
+  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any): Promise<ITypeDefinition>|ITypeDefinition;
   /**
    * opens and editor to edit the options
    * @param def
@@ -169,7 +169,7 @@ export function string_(): IValueTypeEditor {
   return {
     isType: () => 1, //always a string
     parse: parseString,
-    guessOptions: (d) => guessString,
+    guessOptions: guessString,
     edit: editString
   };
 }
@@ -200,7 +200,7 @@ function editCategorical(definition: ITypeDefinition) {
     `;
     const textarea = dialog.body.querySelector('textarea');
     //http://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea#6637396 enable tab character
-    textarea.addEventListener('keydown', function (e: KeyboardEvent) {
+    textarea.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.keyCode === 9 || e.which === 9) {
         e.preventDefault();
         const s = textarea.selectionStart;
@@ -494,23 +494,30 @@ export interface IGuessOptions {
  * @param options additional options
  * @return {any}
  */
-export function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): ValueTypeEditor {
+export async function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): Promise<ValueTypeEditor> {
   options = mixin({
     sampleSize: 100,
     thresholds: <any>{
       numerical: 0.7,
-      categorical: 0.7
+      categorical: 0.7,
+      real: 0.7,
+      int: 0.7
     }
   }, options);
   const testSize = Math.min(options.sampleSize, data.length);
 
-  //compute guess results
-  let results = editors.map((editor) => ({
+  // one promise for each editor for a given column
+  const promises = editors.map((editor) => editor.isType(name, index, data, accessor, testSize));
+
+  const confidenceValues = await Promise.all(promises);
+
+  let results = editors.map((editor, i) => ({
     type: editor.id,
     editor,
-    confidence: editor.isType(name, index, data, accessor, testSize),
+    confidence: confidenceValues[i],
     priority: editor.priority
   }));
+
   //filter all 0 confidence ones by its threshold
   results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
 
@@ -523,11 +530,11 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   return results[0].editor;
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true) {
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: string = '') {
   return `
   <select class='form-control'>
           ${emptyOne? '<option value=""></option>':''}
-          ${editors.map((editor) => `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name}</option>`).join('\n')}
+          ${editors.map((editor) => `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name} ${current && current.id === editor.id && current.name === 'IDType' ? `(${idType})` : ''}</option>`).join('\n')}
         </select>
         <span class="input-group-btn">
           <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
