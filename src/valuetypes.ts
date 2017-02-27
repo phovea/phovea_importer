@@ -531,7 +531,7 @@ export async function guessValueType(editors: ValueTypeEditor[], name: string, i
   return results[0].editor;
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, detectedIDType: string, emptyOne = true) {
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, detectedIDType: string = '', emptyOne = true) {
   const allIDTypes = listIDTypes().filter((idType) => !isInternalIDType(idType));
   const numericalTypes = ['real', 'int'];
   let oneNumericType = false;
