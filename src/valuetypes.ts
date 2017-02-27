@@ -5,6 +5,7 @@
 import {generateDialog} from 'phovea_ui/src/dialogs';
 import {list as listPlugins, load as loadPlugins, IPlugin, get as getPlugin} from 'phovea_core/src/plugin';
 import {mixin} from 'phovea_core/src/index';
+import {list as listIDTypes, isInternalIDType} from 'phovea_core/src/idtype';
 
 //https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category10
 const categoryColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
@@ -530,15 +531,32 @@ export async function guessValueType(editors: ValueTypeEditor[], name: string, i
   return results[0].editor;
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: string = '') {
-  return `
-  <select class='form-control'>
-          ${emptyOne? '<option value=""></option>':''}
-          ${editors.map((editor) => `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name} ${current && current.id === editor.id && current.name === 'IDType' ? `(${idType})` : ''}</option>`).join('\n')}
-        </select>
-        <span class="input-group-btn">
-          <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
-        </span>`;
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, detectedIDType: string, emptyOne = true) {
+  const allIDTypes = listIDTypes().filter((idType) => !isInternalIDType(idType));
+  const numericalTypes = ['real', 'int'];
+  let oneNumericType = false;
+  const options = editors.map((editor) => {
+    if(editor.id === 'idType') {
+      return `<optgroup label="Identifier">
+            ${allIDTypes.map((type) => `<option value="${editor.id}" ${current && current.id === editor.id && type.name === detectedIDType? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
+        </optgroup>`;
+    } else if(!oneNumericType && numericalTypes.indexOf(editor.id) >= 0) { // add markup for numerical type once and not for each numeric type editor (e.g. int and real)
+      oneNumericType = true;
+      return `<optgroup label="Numeric">
+            ${numericalTypes.map((type) => `<option value="${type}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
+        </optgroup>`;
+    } else if(numericalTypes.indexOf(editor.id) === -1) { // skip markup for subsequent numerical editors
+      return `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name}</option>`;
+    }
+  }).join('\n');
+
+ return `<select class="form-control">
+        ${emptyOne? '<option value=""></option>':''}
+        ${options}
+    </select>
+    <span class="input-group-btn">
+      <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
+    </span>`;
 }
 
 export function updateType(editors: ValueTypeEditor[], emptyOne = true) {

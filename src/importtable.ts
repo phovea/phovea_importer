@@ -61,6 +61,12 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
     }
   }));
 
+  const idTypeConfig = config.filter((d) => {
+     return d.editor.name === 'IDType';
+    })[0];
+
+  const detectedIDType = idTypeConfig? (await idTypeConfig.editor.guessOptions({type: null}, data, (col) => col[idTypeConfig.column])).idType : '';
+
   const $rows = $root.select('tbody').selectAll('tr').data(config);
 
   const $rowsEnter = $rows.enter().append('tr')
@@ -69,7 +75,7 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
         <input type="input" class="form-control" value="${d.name}">
       </td>
       <td class="input-group">
-          ${createTypeEditor(editors, d.editor)}
+          ${createTypeEditor(editors, d.editor, detectedIDType)}
       </td>`);
   $rowsEnter.select('input').on('change', function (d) {
     d.name = this.value;
