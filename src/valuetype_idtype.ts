@@ -4,12 +4,26 @@
 
 import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
 import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
+import {list} from 'phovea_core/src/plugin';
 
 /**
  * edits the given type definition in place with idtype properties
  * @param definition call by reference argument
  * @return {Promise<R>|Promise}
  */
+
+const EXTENSION_POINT = 'idTypeDetector';
+
+export interface IIDTypeDetector {
+  detectIDType: (data: any[], accessor: (row: any) => string, sampleSize: number, options?: {[property: string]: any}) => Promise<number>|number;
+}
+
+interface IPluginResult {
+  idType: string;
+  confidence: number;
+}
+
+
 function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   const idtype = (<any>definition).idType || 'Custom';
   const existing = listidtypes().filter((d) => !isInternalIDType(d));
@@ -45,19 +59,45 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   });
 }
 
-function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
+async function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   const anyDef: any = def;
   if (typeof anyDef.idType !== 'undefined') {
     return def;
   }
-  anyDef.idType = 'Custom';
-  //TODO
+
+  const pluginPromise = executePlugins(data, accessor, Math.min(data.length, 100));
+  const results = await pluginPromise;
+  const confidences = results.map((result) => result.confidence);
+
+  const maxConfidence = Math.max(...confidences);
+
+  anyDef.idType = maxConfidence > 0.7? results[confidences.indexOf(maxConfidence)].idType : 'Custom';
+
   return def;
 }
 
-function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
-  //TODO guess the first one is it most of the times
-  return index === 0 ? 0.5 : 0;
+async function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
+  const pluginPromise = executePlugins(data, accessor, sampleSize);
+  const results = await pluginPromise;
+
+  const confidences = results.map((result) => result.confidence);
+
+  return Math.max(...confidences);
+}
+
+async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number) {
+  const results = list(EXTENSION_POINT).map( async (pluginDesc) => {
+    const factory = await pluginDesc.load();
+    const options = pluginDesc.options? pluginDesc.options : null;
+    const plugin: IIDTypeDetector = factory.factory();
+    const confidence = await plugin.detectIDType(data, accessor, sampleSize, options);
+    return {
+      idType: pluginDesc.idType,
+      confidence
+    };
+  });
+
+  return await Promise.all(results);
 }
 
 function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {

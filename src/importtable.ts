@@ -34,7 +34,7 @@ function extractCommonFields($root: d3.Selection<any>) {
   };
 }
 
-export function importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
+export async function importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
   $root.html(`${commonFields(name)}
       <table class="table table-striped table-condensed">
         <thead>
@@ -46,10 +46,16 @@ export function importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>
         </tbody>
       </table>
     `);
+
+  const configPromises = header.map((name, i) => {
+    return guessValueType(editors, name, i, data, (row) => row[i], i);
+  });
+
+  const guessedEditors = await Promise.all(configPromises);
   const config = header.map((name, i) => ({
     column: i,
     name,
-    editor: guessValueType(editors, name, i, data, (row) => row[i], i),
+    editor: guessedEditors[i],
     value: {
       type: null
     }
@@ -125,7 +131,7 @@ function toTableDataDescription(config: IColumnDefinition[], data: any[], common
 }
 
 
-export function importMatrix(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
+export async function importMatrix(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
   const prefix = 'a' + randomId(3);
 
   const rows = header.slice(1),
@@ -142,6 +148,7 @@ export function importMatrix(editors: ValueTypeEditor[], $root: d3.Selection<any
     }
   }
 
+  const editor = await guessValueType(editors, 'value', -1, dataRange, byIndex);
   const configs = [{
     column: -1,
     name: 'Row ID Type',
@@ -162,7 +169,7 @@ export function importMatrix(editors: ValueTypeEditor[], $root: d3.Selection<any
     value: {
       type: null
     },
-    editor: guessValueType(editors, 'value', -1, dataRange, byIndex)
+    editor
   }];
 
   const $rows = $root.html(commonFields(name)).selectAll('div.field').data(configs);
