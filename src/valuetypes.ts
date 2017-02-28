@@ -538,7 +538,7 @@ export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeE
   const options = editors.map((editor) => {
     if(editor.id === 'idType') {
       return `<optgroup label="Identifier">
-            ${allIDTypes.map((type) => `<option value="${type.id}" ${current && current.id === editor.id && type.name === detectedIDType? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
+            ${allIDTypes.map((type) => `<option value="${editor.id}" ${current && current.id === editor.id && type.name === detectedIDType? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
         </optgroup>`;
     } else if(!oneNumericType && numericalTypes.indexOf(editor.id) >= 0) { // add markup for numerical type once and not for each numeric type editor (e.g. int and real)
       oneNumericType = true;
@@ -561,7 +561,8 @@ export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeE
 
 export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
   return function (d) {
-    const type = ((emptyOne && this.selectedIndex <= 0)) ? null : editors[this.selectedIndex < 0 ? 0 : this.selectedIndex - (emptyOne?1:0)];
+    const type = editors.filter((editor) => editor.id === this.value)[0];
+
     d.value.type = type ? type.id : '';
     d.editor = type;
     const configure = <HTMLButtonElement>this.parentElement.querySelector('button');
