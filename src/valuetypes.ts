@@ -47,7 +47,7 @@ export interface IValueTypeEditor {
 export function createDialog(title: string, classSuffix: string, onSubmit: ()=>any) {
   const dialog = generateDialog(title, 'Save');
   dialog.body.classList.add('caleydo-importer-' + classSuffix);
-  const form = document.createElement('form');
+  const form = dialog.body.ownerDocument.createElement('form');
   dialog.body.appendChild(form);
   form.addEventListener('submit', function (e) {
     e.preventDefault();
