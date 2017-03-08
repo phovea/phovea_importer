@@ -561,7 +561,7 @@ export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
     let type = null;
     if(parent.nodeName !== 'OPTGROUP') {
       type = editors.find((editor) => editor.id === this.value);
-    } else{
+    } else {
       type = editors.find((editor) => editor.id === parent.dataset.type);
       d.value[parent.dataset.type] = this.value;
     }
