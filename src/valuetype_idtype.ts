@@ -71,7 +71,7 @@ async function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: an
 
   const maxConfidence = Math.max(...confidences);
 
-  anyDef.idType = maxConfidence > 0.7? results[confidences.indexOf(maxConfidence)].idType : 'Custom';
+  anyDef.subType = maxConfidence > 0.7? results[confidences.indexOf(maxConfidence)].idType : 'Custom';
 
   return def;
 }
@@ -105,11 +105,20 @@ function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, val
   return [];
 }
 
+function getMarkup(current): string {
+  const allIDTypes = listidtypes().filter((idType) => !isInternalIDType(idType));
+
+  return `<optgroup label="Identifier">
+        ${allIDTypes.map((type) => `<option value=${this.id} ${current && current.id === this.id && type.name === this.desc.subType ? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
+    </optgroup>`;
+}
+
 export function idType(): IValueTypeEditor {
   return {
     isType: isIDType,
     parse: parseIDType,
     guessOptions: guessIDType,
-    edit: editIDType
+    edit: editIDType,
+    getOptionsMarkup: getMarkup
   };
 }
