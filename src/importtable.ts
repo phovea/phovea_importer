@@ -52,20 +52,12 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
   });
 
   const guessedEditors = await Promise.all(configPromises);
-  const config = header.map((name, i) => ({
+  const config = await Promise.all(header.map(async (name, i) => ({
     column: i,
     name,
     editor: guessedEditors[i],
-    value: {
-      type: null
-    }
-  }));
-
-  const idTypeConfig = config.filter((d) => {
-     return d.editor.name === 'IDType';
-    })[0];
-
-  const detectedIDType = idTypeConfig? (await idTypeConfig.editor.guessOptions({type: null}, data, (col) => col[idTypeConfig.column])).idType : '';
+    value: await guessedEditors[i].guessOptions({type: null}, data, (col) => col[i])
+  })));
 
   const $rows = $root.select('tbody').selectAll('tr').data(config);
 
@@ -75,14 +67,13 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
         <input type="input" class="form-control" value="${d.name}">
       </td>
       <td class="input-group">
-          ${createTypeEditor(editors, d.editor, detectedIDType)}
+          ${createTypeEditor(editors, d.editor, d.value)}
       </td>`);
   $rowsEnter.select('input').on('change', function (d) {
     d.name = this.value;
   });
   $rowsEnter.select('select').on('change', updateType(editors));
   $rowsEnter.select('button').on('click', (d) => {
-    d.editor.guessOptions(d.value, data, (row) => row[d.column]);
     d.editor.edit(d.value);
   });
   const common = extractCommonFields($root);
