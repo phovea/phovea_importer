@@ -3,7 +3,7 @@
  */
 
 import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
-import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
+import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor} from './valuetypes';
 import {list} from 'phovea_core/src/plugin';
 
 /**
@@ -71,7 +71,7 @@ async function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: an
 
   const maxConfidence = Math.max(...confidences);
 
-  anyDef.subType = maxConfidence > 0.7? results[confidences.indexOf(maxConfidence)].idType : 'Custom';
+  anyDef.idType = maxConfidence > 0.7? results[confidences.indexOf(maxConfidence)].idType : 'Custom';
 
   return def;
 }
@@ -105,11 +105,11 @@ function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, val
   return [];
 }
 
-function getMarkup(current): string {
+function getMarkup(current: ValueTypeEditor, def: ITypeDefinition): string {
   const allIDTypes = listidtypes().filter((idType) => !isInternalIDType(idType));
 
   return `<optgroup label="Identifier">
-        ${allIDTypes.map((type) => `<option value=${this.id} ${current && current.id === this.id && type.name === this.desc.subType ? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
+        ${allIDTypes.map((type) => `<option value=${this.id} ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
     </optgroup>`;
 }
 

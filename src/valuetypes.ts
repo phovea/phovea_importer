@@ -43,7 +43,7 @@ export interface IValueTypeEditor {
    */
   edit(def: ITypeDefinition);
 
-  getOptionsMarkup(current: ValueTypeEditor): string;
+  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition): string;
 }
 
 export function createDialog(title: string, classSuffix: string, onSubmit: ()=>any) {
@@ -443,11 +443,9 @@ export class ValueTypeEditor implements IValueTypeEditor {
     return this.impl.parse(def, data, accessor);
   }
 
-  async guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any) {
+  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any) {
     def.type = this.id;
-    const types = await this.impl.guessOptions(def, data, accessor);
-    this.desc.subType = types.subType;
-    return types;
+    return this.impl.guessOptions(def, data, accessor);
   }
 
   edit(def: ITypeDefinition) {
@@ -455,8 +453,8 @@ export class ValueTypeEditor implements IValueTypeEditor {
     return this.impl.edit(def);
   }
 
-  getOptionsMarkup(current) {
-    return this.impl.getOptionsMarkup.call(this, current);
+  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition) {
+    return this.impl.getOptionsMarkup.call(this, current, def);
   }
 }
 
@@ -544,10 +542,8 @@ export async function guessValueType(editors: ValueTypeEditor[], name: string, i
   return results[0].editor;
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true) {
-  const options = editors.map((editor) => {
-    editor.getOptionsMarkup(current);
-  }).join('\n');
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, def: ITypeDefinition, emptyOne = true) {
+  const options = editors.map((editor) => editor.getOptionsMarkup(current, def)).join('\n');
 
  return `<select class="form-control">
         ${emptyOne? '<option value=""></option>':''}
@@ -560,7 +556,7 @@ export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeE
 
 export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
   return function (d) {
-    const type = editors.filter((editor) => editor.id === this.value)[0];
+    const type = editors.find((editor) => editor.id === this.value);
 
     d.value.type = type ? type.id : '';
     d.editor = type;
