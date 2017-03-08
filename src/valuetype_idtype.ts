@@ -109,7 +109,7 @@ function getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: ITypeDe
   const allIDTypes = listidtypes().filter((idType) => !isInternalIDType(idType));
 
   return `<optgroup label="Identifier" data-type="idType">
-        ${allIDTypes.map((type) => `<option value=${type.name} ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
+        ${allIDTypes.map((type) => `<option value="${type.id}" ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n')}
     </optgroup>`;
 }
 
