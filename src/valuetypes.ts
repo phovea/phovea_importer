@@ -166,7 +166,7 @@ function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, val
   return invalid;
 }
 
-export function singleOption(current: ValueTypeEditor) {
+export function singleOption(this: ValueTypeEditor, current: ValueTypeEditor) {
   return `<option value="${this.id}" ${current && current.id === this.id ? 'selected="selected"' : ''}>${this.name}</option>`;
 }
 

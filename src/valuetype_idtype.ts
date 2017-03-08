@@ -105,7 +105,7 @@ function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, val
   return [];
 }
 
-function getMarkup(current: ValueTypeEditor, def: ITypeDefinition): string {
+function getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: ITypeDefinition): string {
   const allIDTypes = listidtypes().filter((idType) => !isInternalIDType(idType));
 
   return `<optgroup label="Identifier">
