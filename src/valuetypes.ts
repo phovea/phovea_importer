@@ -556,7 +556,15 @@ export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeE
 
 export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
   return function (d) {
-    const type = editors.find((editor) => editor.id === this.value);
+    const parent = this.options[this.selectedIndex].parentNode;
+
+    let type = null;
+    if(parent.nodeName !== 'OPTGROUP') {
+      type = editors.find((editor) => editor.id === this.value);
+    } else{
+      type = editors.find((editor) => editor.id === parent.dataset.type);
+      d.value[parent.dataset.type] = this.value;
+    }
 
     d.value.type = type ? type.id : '';
     d.editor = type;

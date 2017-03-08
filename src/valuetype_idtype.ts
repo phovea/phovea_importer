@@ -108,8 +108,8 @@ function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, val
 function getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: ITypeDefinition): string {
   const allIDTypes = listidtypes().filter((idType) => !isInternalIDType(idType));
 
-  return `<optgroup label="Identifier">
-        ${allIDTypes.map((type) => `<option value=${this.id} ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
+  return `<optgroup label="Identifier" data-type="idType">
+        ${allIDTypes.map((type) => `<option value=${type.name} ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type}</option>`).join('\n')}
     </optgroup>`;
 }
 
