@@ -295,7 +295,6 @@ export function categorical(): IValueTypeEditor {
  * @return {Promise<R>|Promise}
  */
 export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinition> {
-  const type = (<any>definition).type || 'real';
   const range = (<any>definition).range || [0, 100];
 
   return new Promise((resolve) => {
@@ -309,14 +308,6 @@ export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinit
       resolve(definition);
     });
     dialog.body.innerHTML = `
-        <div class="checkbox">
-          <label class="radio-inline">
-            <input type="radio" name="numerical-type" value="real" ${type !== 'int' ? 'checked="checked"' : ''}> Float
-          </label>
-          <label class="radio-inline">
-            <input type="radio" name="numerical-type" value="int" ${type === 'int' ? 'checked="checked"' : ''}> Integer
-          </label>
-        </div>
         <div class="form-group">
           <label for="minRange">Minimum Value</label>
           <input type="number" class="form-control" name="numerical-min" step="any" value="${range[0]}">
