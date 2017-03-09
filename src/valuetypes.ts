@@ -43,6 +43,12 @@ export interface IValueTypeEditor {
    */
   edit(def: ITypeDefinition);
 
+  /**
+   * returns markup to show inside a select box. the markup is either a single option or a whole optgroup with options
+   * if it is an optgroup, the editor type is represented as data-type attribute, whereas the subtype is the option's value (e.g. optgroup[data-type=idType], option[value=Ensembl])
+   * @param current current editor
+   * @param def definition of the editor. E.g. which type the editor is (and which idType the column has if it is an IDTypeEditor)
+   */
   getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition): string;
 }
 
@@ -560,9 +566,11 @@ export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
 
     let type = null;
     if(parent.nodeName !== 'OPTGROUP') {
-      type = editors.find((editor) => editor.id === this.value);
+      type = editors.find((editor) => editor.id === this.value) || null;
     } else {
-      type = editors.find((editor) => editor.id === parent.dataset.type);
+      // find type based on the surrounding optgroup
+      // the type of the editor is saved as the data-type of the optgroup, the value is the subtype (e.g. idType)
+      type = editors.find((editor) => editor.id === parent.dataset.type) || null;
       d.value[parent.dataset.type] = this.value;
     }
 
