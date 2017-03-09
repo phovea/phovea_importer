@@ -42,6 +42,14 @@ export interface IValueTypeEditor {
    * @param def
    */
   edit(def: ITypeDefinition);
+
+  /**
+   * returns markup to show inside a select box. the markup is either a single option or a whole optgroup with options
+   * if it is an optgroup, the editor type is represented as data-type attribute, whereas the subtype is the option's value (e.g. optgroup[data-type=idType], option[value=Ensembl])
+   * @param current current editor
+   * @param def definition of the editor. E.g. which type the editor is (and which idType the column has if it is an IDTypeEditor)
+   */
+  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition): string;
 }
 
 export function createDialog(title: string, classSuffix: string, onSubmit: ()=>any) {
@@ -164,13 +172,17 @@ function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, val
   return invalid;
 }
 
+export function singleOption(this: ValueTypeEditor, current: ValueTypeEditor) {
+  return `<option value="${this.id}" ${current && current.id === this.id ? 'selected="selected"' : ''}>${this.name}</option>`;
+}
 
 export function string_(): IValueTypeEditor {
   return {
     isType: () => 1, //always a string
     parse: parseString,
     guessOptions: guessString,
-    edit: editString
+    edit: editString,
+    getOptionsMarkup: singleOption
   };
 }
 
@@ -272,7 +284,8 @@ export function categorical(): IValueTypeEditor {
     isType: isCategorical,
     parse: parseCategorical,
     guessOptions: guessCategorical,
-    edit: editCategorical
+    edit: editCategorical,
+    getOptionsMarkup: singleOption
   };
 }
 
@@ -392,7 +405,8 @@ export function numerical(): IValueTypeEditor {
     isType: isNumerical,
     parse: parseNumerical,
     guessOptions: guessNumerical,
-    edit: editNumerical
+    edit: editNumerical,
+    getOptionsMarkup: singleOption
   };
 }
 
@@ -443,6 +457,10 @@ export class ValueTypeEditor implements IValueTypeEditor {
   edit(def: ITypeDefinition) {
     def.type = this.id;
     return this.impl.edit(def);
+  }
+
+  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition) {
+    return this.impl.getOptionsMarkup.call(this, current, def);
   }
 }
 
@@ -530,20 +548,32 @@ export async function guessValueType(editors: ValueTypeEditor[], name: string, i
   return results[0].editor;
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true, idType: string = '') {
-  return `
-  <select class='form-control'>
-          ${emptyOne? '<option value=""></option>':''}
-          ${editors.map((editor) => `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name} ${current && current.id === editor.id && current.name === 'IDType' ? `(${idType})` : ''}</option>`).join('\n')}
-        </select>
-        <span class="input-group-btn">
-          <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
-        </span>`;
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, def: ITypeDefinition, emptyOne = true) {
+  const options = editors.map((editor) => editor.getOptionsMarkup(current, def)).join('\n');
+
+ return `<select class="form-control">
+        ${emptyOne? '<option value=""></option>':''}
+        ${options}
+    </select>
+    <span class="input-group-btn">
+      <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
+    </span>`;
 }
 
 export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
   return function (d) {
-    const type = ((emptyOne && this.selectedIndex <= 0)) ? null : editors[this.selectedIndex < 0 ? 0 : this.selectedIndex - (emptyOne?1:0)];
+    const parent = this.options[this.selectedIndex].parentNode;
+
+    let type = null;
+    if(parent.nodeName !== 'OPTGROUP') {
+      type = editors.find((editor) => editor.id === this.value) || null;
+    } else {
+      // find type based on the surrounding optgroup
+      // the type of the editor is saved as the data-type of the optgroup, the value is the subtype (e.g. idType)
+      type = editors.find((editor) => editor.id === parent.dataset.type) || null;
+      d.value[parent.dataset.type] = this.value;
+    }
+
     d.value.type = type ? type.id : '';
     d.editor = type;
     const configure = <HTMLButtonElement>this.parentElement.querySelector('button');

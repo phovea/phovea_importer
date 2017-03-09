@@ -3,7 +3,7 @@
  */
 
 import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
-import {ITypeDefinition, IValueTypeEditor, createDialog} from './valuetypes';
+import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor} from './valuetypes';
 import {list} from 'phovea_core/src/plugin';
 
 /**
@@ -105,11 +105,20 @@ function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, val
   return [];
 }
 
+function getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: ITypeDefinition): string {
+  const allIDTypes = listidtypes().filter((idType) => !isInternalIDType(idType));
+
+  return `<optgroup label="Identifier" data-type="${this.id}">
+        ${allIDTypes.map((type) => `<option value="${type.id}" ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n')}
+    </optgroup>`;
+}
+
 export function idType(): IValueTypeEditor {
   return {
     isType: isIDType,
     parse: parseIDType,
     guessOptions: guessIDType,
-    edit: editIDType
+    edit: editIDType,
+    getOptionsMarkup: getMarkup
   };
 }
