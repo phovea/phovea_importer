@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {list as listidtypes, isInternalIDType} from 'phovea_core/src/idtype';
+import {list as listidtypes, isInternalIDType, resolve as resolveIDType} from 'phovea_core/src/idtype';
 import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor} from './valuetypes';
 import {list} from 'phovea_core/src/plugin';
 
@@ -27,33 +27,27 @@ interface IPluginResult {
 function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   const idtype = (<any>definition).idType || 'Custom';
   const existing = listidtypes().filter((d) => !isInternalIDType(d));
-  const idtypeList = existing.map((type) => `<option value="${type.id}" ${type.id === idtype ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n');
 
   return new Promise((resolve) => {
     const dialog = createDialog('Edit IDType', 'idtype', () => {
-      const selectedIndex = (<HTMLSelectElement>dialog.body.querySelector('select')).selectedIndex;
-      const idType = selectedIndex <= 0 ? (<HTMLInputElement>dialog.body.querySelector('input')).value : existing[selectedIndex - 1].id;
+
+      const value = (<HTMLInputElement>dialog.body.querySelector('input')).value;
+      const existingIDType = existing.find((idType) => idType.id === value);
+      const idType = existingIDType? existingIDType.id : value;
+
       dialog.hide();
       definition.type = 'idType';
       (<any>definition).idType = idType;
+
+      resolveIDType(idType);
       resolve(definition);
     });
     dialog.body.innerHTML = `
-       <div class="form-group">
-          <label for="idType">IDType</label>
-          <select id="idType" class="form-control">
-            <option value=""></option>
-            ${idtypeList} 
-          </select>
-        </div>
         <div class="form-group">
           <label for="idType_new">New IDType</label>
           <input type="text" class="form-control" id="idType_new" value="${existing.some((i) => i.id === idtype) ? '' : idtype}">
         </div>
     `;
-    (<HTMLSelectElement>(dialog.body.querySelector('select'))).addEventListener('change', function (e) {
-      (<HTMLInputElement>(dialog.body.querySelector('input'))).disabled = (<HTMLSelectElement>this).selectedIndex !== 0;
-    });
 
     dialog.show();
   });
