@@ -80,7 +80,7 @@ async function isIDType(name: string, index: number, data: any[], accessor: (row
   return Math.max(...confidences);
 }
 
-async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number) {
+async function executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number): Promise<IPluginResult[]> {
   const results = list(EXTENSION_POINT).map( async (pluginDesc) => {
     const factory = await pluginDesc.load();
     const options = pluginDesc.options? pluginDesc.options : null;
