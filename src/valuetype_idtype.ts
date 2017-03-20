@@ -2,9 +2,10 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {list as listidtypes, isInternalIDType, resolve as resolveIDType} from 'phovea_core/src/idtype';
+import {list as listidtypes, resolve as resolveIDType} from 'phovea_core/src/idtype';
 import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor} from './valuetypes';
 import {list} from 'phovea_core/src/plugin';
+import {isInternalIDType} from 'phovea_core/src/idtype/manager';
 
 /**
  * edits the given type definition in place with idtype properties
