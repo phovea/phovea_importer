@@ -24,7 +24,7 @@ export interface IValueTypeEditor {
    * @param sampleSize
    * @return the confidence (0 ... not, 1 ... sure) that this is the right value type
    */
-  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): number;
+  isType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): Promise<number>|number;
   /**
    * parses the given value and updates them inplace
    * @return an array containing invalid indices
@@ -36,20 +36,27 @@ export interface IValueTypeEditor {
    * @param data
    * @param accessor
    */
-  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any);
+  guessOptions(def: ITypeDefinition, data: any[], accessor: (row: any) => any): Promise<ITypeDefinition>|ITypeDefinition;
   /**
    * opens and editor to edit the options
    * @param def
    */
   edit(def: ITypeDefinition);
+
+  /**
+   * returns markup to show inside a select box. the markup is either a single option or a whole optgroup with options
+   * if it is an optgroup, the editor type is represented as data-type attribute, whereas the subtype is the option's value (e.g. optgroup[data-type=idType], option[value=Ensembl])
+   * @param current current editor
+   * @param def definition of the editor. E.g. which type the editor is (and which idType the column has if it is an IDTypeEditor)
+   */
+  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition): string;
 }
 
 export function createDialog(title: string, classSuffix: string, onSubmit: ()=>any) {
   const dialog = generateDialog(title, 'Save');
   dialog.body.classList.add('caleydo-importer-' + classSuffix);
-  const form = document.createElement('form');
+  const form = dialog.body.ownerDocument.createElement('form');
   dialog.body.appendChild(form);
-  dialog.body = form;
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     onSubmit();
@@ -132,11 +139,11 @@ function editString(definition: ITypeDefinition) {
 }
 
 function guessString(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
-  const any_def: any = def;
-  if (typeof any_def.convert !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.convert !== 'undefined') {
     return def;
   }
-  any_def.convert = null;
+  anyDef.convert = null;
   return def;
 }
 
@@ -158,20 +165,24 @@ function parseString(def: ITypeDefinition, data: any[], accessor: (row: any, val
 
   const invalid = [];
   data.forEach((d, i) => {
-    var v = String(accessor(d));
+    let v = String(accessor(d));
     v = op(v);
     accessor(d, v);
   });
   return invalid;
 }
 
+export function singleOption(this: ValueTypeEditor, current: ValueTypeEditor) {
+  return `<option value="${this.id}" ${current && current.id === this.id ? 'selected="selected"' : ''}>${this.name}</option>`;
+}
 
 export function string_(): IValueTypeEditor {
   return {
     isType: () => 1, //always a string
     parse: parseString,
-    guessOptions: (d) => guessString,
-    edit: editString
+    guessOptions: guessString,
+    edit: editString,
+    getOptionsMarkup: singleOption
   };
 }
 
@@ -187,7 +198,7 @@ function editCategorical(definition: ITypeDefinition) {
     const dialog = createDialog('Edit Categories (name TAB color)', 'categorical', () => {
       const text = (<HTMLTextAreaElement>dialog.body.querySelector('textarea')).value;
       const categories = text.trim().split('\n').map((row) => {
-        var l = row.trim().split('\t');
+        const l = row.trim().split('\t');
         return {name: l[0].trim(), color: l.length > 1 ? l[1].trim() : 'gray'};
       });
       dialog.hide();
@@ -201,12 +212,12 @@ function editCategorical(definition: ITypeDefinition) {
     `;
     const textarea = dialog.body.querySelector('textarea');
     //http://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea#6637396 enable tab character
-    textarea.addEventListener('keydown', function (e: KeyboardEvent) {
+    textarea.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.keyCode === 9 || e.which === 9) {
         e.preventDefault();
-        var s = this.selectionStart;
-        this.value = this.value.substring(0, this.selectionStart) + '\t' + this.value.substring(this.selectionEnd);
-        this.selectionEnd = s + 1;
+        const s = textarea.selectionStart;
+        textarea.value = textarea.value.substring(0, textarea.selectionStart) + '\t' + textarea.value.substring(textarea.selectionEnd);
+        textarea.selectionEnd = s + 1;
       }
     });
     dialog.show();
@@ -214,17 +225,17 @@ function editCategorical(definition: ITypeDefinition) {
 }
 
 function guessCategorical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
-  const any_def: any = def;
-  if (typeof any_def.categories !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.categories !== 'undefined') {
     return def;
   }
   //unique values
-  var cache = {};
+  const cache = {};
   data.forEach((row) => {
     const v = accessor(row);
     cache[v] = v;
   });
-  any_def.categories = Object.keys(cache).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).map((cat, i) => ({
+  anyDef.categories = Object.keys(cache).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).map((cat, i) => ({
     name: cat,
     color: categoryColors[i] || 'gray'
   }));
@@ -237,9 +248,9 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
     return 0;
   }
   const categories = {};
-  var validSize = 0;
+  let validSize = 0;
   for (let i = 0; i < testSize; ++i) {
-    let v = accessor(data[i]);
+    const v = accessor(data[i]);
     if (v == null || v.trim().length === 0) {
       continue; //skip empty samples
     }
@@ -247,8 +258,8 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
     categories[v] = v;
   }
 
-  const num_cats = Object.keys(categories).length;
-  return 1 - num_cats / validSize;
+  const numCats = Object.keys(categories).length;
+  return 1 - numCats / validSize;
 }
 
 function parseCategorical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
@@ -273,7 +284,8 @@ export function categorical(): IValueTypeEditor {
     isType: isCategorical,
     parse: parseCategorical,
     guessOptions: guessCategorical,
-    edit: editCategorical
+    edit: editCategorical,
+    getOptionsMarkup: singleOption
   };
 }
 
@@ -283,28 +295,19 @@ export function categorical(): IValueTypeEditor {
  * @return {Promise<R>|Promise}
  */
 export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinition> {
-  const type = (<any>definition).type || 'real';
   const range = (<any>definition).range || [0, 100];
 
   return new Promise((resolve) => {
     const dialog = createDialog('Edit Numerical Range', 'numerical', () => {
-      const type_s = (<HTMLInputElement>dialog.body.querySelector('input[name=numerical-type]')).checked ? 'real' : 'int';
-      const min_r = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-min]')).value);
-      const max_r = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-max]')).value);
+      const typeS = (<HTMLInputElement>dialog.body.querySelector('input[name=numerical-type]')).checked ? 'real' : 'int';
+      const minR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-min]')).value);
+      const maxR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-max]')).value);
       dialog.hide();
-      definition.type = type_s;
-      (<any>definition).range = [min_r, max_r];
+      definition.type = typeS;
+      (<any>definition).range = [minR, maxR];
       resolve(definition);
     });
     dialog.body.innerHTML = `
-        <div class="checkbox">
-          <label class="radio-inline">
-            <input type="radio" name="numerical-type" value="real" ${type !== 'int' ? 'checked="checked"' : ''}> Float
-          </label>
-          <label class="radio-inline">
-            <input type="radio" name="numerical-type" value="int" ${type === 'int' ? 'checked="checked"' : ''}> Integer
-          </label>
-        </div>
         <div class="form-group">
           <label for="minRange">Minimum Value</label>
           <input type="number" class="form-control" name="numerical-min" step="any" value="${range[0]}">
@@ -324,26 +327,26 @@ function isMissingNumber(v: string) {
 
 export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
   //TODO support different notations, comma vs point
-  const any_def: any = def;
-  if (typeof any_def.range !== 'undefined') {
+  const anyDef: any = def;
+  if (typeof anyDef.range !== 'undefined') {
     return def;
   }
-  var min_v = NaN;
-  var max_v = NaN;
+  let minV = NaN;
+  let maxV = NaN;
   data.forEach((row) => {
     const raw = accessor(row);
     if (isMissingNumber(raw)) {
       return; //skip
     }
     const v = parseFloat(raw);
-    if (isNaN(min_v) || v < min_v) {
-      min_v = v;
+    if (isNaN(minV) || v < minV) {
+      minV = v;
     }
-    if (isNaN(max_v) || v > max_v) {
-      max_v = v;
+    if (isNaN(maxV) || v > maxV) {
+      maxV = v;
     }
   });
-  any_def.range = [isNaN(min_v) ? 0: min_v, isNaN(max_v) ? 100 : max_v];
+  anyDef.range = [isNaN(minV) ? 0: minV, isNaN(maxV) ? 100 : maxV];
   return def;
 }
 
@@ -353,11 +356,11 @@ function isNumerical(name: string, index: number, data: any[], accessor: (row: a
     return 0;
   }
   const isFloat = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
-  var numNumerical = 0;
-  var validSize = 0;
+  let numNumerical = 0;
+  let validSize = 0;
 
   for (let i = 0; i < testSize; ++i) {
-    let v = accessor(data[i]);
+    const v = accessor(data[i]);
     if (isMissingNumber(v)) {
       continue; //skip empty samples
     }
@@ -393,7 +396,8 @@ export function numerical(): IValueTypeEditor {
     isType: isNumerical,
     parse: parseNumerical,
     guessOptions: guessNumerical,
-    edit: editNumerical
+    edit: editNumerical,
+    getOptionsMarkup: singleOption
   };
 }
 
@@ -445,14 +449,18 @@ export class ValueTypeEditor implements IValueTypeEditor {
     def.type = this.id;
     return this.impl.edit(def);
   }
+
+  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition) {
+    return this.impl.getOptionsMarkup.call(this, current, def);
+  }
 }
 
 export function createCustomValueTypeEditor(name: string, id: string, implicit: boolean, desc: IValueTypeEditor) {
   return new ValueTypeEditor(<any>{
     desc: {
-      name: name,
-      id: id,
-      implicit: implicit
+      name,
+      id,
+      implicit
     },
     factory: ()=>desc
   });
@@ -495,23 +503,30 @@ export interface IGuessOptions {
  * @param options additional options
  * @return {any}
  */
-export function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): ValueTypeEditor {
+export async function guessValueType(editors: ValueTypeEditor[], name: string, index: number, data: any[], accessor: (row: any) => any, options: IGuessOptions = {}): Promise<ValueTypeEditor> {
   options = mixin({
     sampleSize: 100,
     thresholds: <any>{
       numerical: 0.7,
-      categorical: 0.7
+      categorical: 0.7,
+      real: 0.7,
+      int: 0.7
     }
   }, options);
   const testSize = Math.min(options.sampleSize, data.length);
 
-  //compute guess results
-  var results = editors.map((editor) => ({
+  // one promise for each editor for a given column
+  const promises = editors.map((editor) => editor.isType(name, index, data, accessor, testSize));
+
+  const confidenceValues = await Promise.all(promises);
+
+  let results = editors.map((editor, i) => ({
     type: editor.id,
-    editor: editor,
-    confidence: editor.isType(name, index, data, accessor, testSize),
+    editor,
+    confidence: confidenceValues[i],
     priority: editor.priority
   }));
+
   //filter all 0 confidence ones by its threshold
   results = results.filter((r) => typeof options.thresholds[r.type] !== 'undefined' ? r.confidence >= options.thresholds[r.type] : r.confidence > 0);
 
@@ -524,20 +539,32 @@ export function guessValueType(editors: ValueTypeEditor[], name: string, index: 
   return results[0].editor;
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, emptyOne = true) {
-  return `
-  <select class='form-control'>
-          ${emptyOne? '<option value=""></option>':''}
-          ${editors.map((editor) => `<option value="${editor.id}" ${current && current.id === editor.id ? 'selected="selected"' : ''}>${editor.name}</option>`).join('\n')}
-        </select>
-        <span class="input-group-btn">
-          <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
-        </span>`;
+export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, def: ITypeDefinition, emptyOne = true) {
+  const options = editors.map((editor) => editor.getOptionsMarkup(current, def)).join('\n');
+
+ return `<select class="form-control">
+        ${emptyOne? '<option value=""></option>':''}
+        ${options}
+    </select>
+    <span class="input-group-btn">
+      <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
+    </span>`;
 }
 
 export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
   return function (d) {
-    const type = ((emptyOne && this.selectedIndex <= 0)) ? null : editors[this.selectedIndex < 0 ? 0 : this.selectedIndex - (emptyOne?1:0)];
+    const parent = this.options[this.selectedIndex].parentNode;
+
+    let type = null;
+    if(parent.nodeName !== 'OPTGROUP') {
+      type = editors.find((editor) => editor.id === this.value) || null;
+    } else {
+      // find type based on the surrounding optgroup
+      // the type of the editor is saved as the data-type of the optgroup, the value is the subtype (e.g. idType)
+      type = editors.find((editor) => editor.id === parent.dataset.type) || null;
+      d.value[parent.dataset.type] = this.value;
+    }
+
     d.value.type = type ? type.id : '';
     d.editor = type;
     const configure = <HTMLButtonElement>this.parentElement.querySelector('button');

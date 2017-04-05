@@ -63,7 +63,7 @@ export class Importer extends EventHandler {
   }
 
   private selectedFile(file: File) {
-    var name = file.name;
+    let name = file.name;
     name = name.substring(0, name.lastIndexOf('.')); //remove .csv
 
     Promise.all([<any>parseCSV(file), createValueTypeEditors()]).then((results) => {
@@ -73,10 +73,14 @@ export class Importer extends EventHandler {
 
       switch(this.options.type) {
         case 'matrix':
-          this.builder = importMatrix(editors, this.$parent, header, data, name);
+          importMatrix(editors, this.$parent, header, data, name).then((b) => {
+            this.builder = b;
+          });
           break;
         default:
-          this.builder = importTable(editors, this.$parent, header, data, name);
+          importTable(editors, this.$parent, header, data, name).then((b) => {
+            this.builder = b;
+          });
           break;
       }
     });
