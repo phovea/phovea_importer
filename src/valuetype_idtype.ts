@@ -2,7 +2,8 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {list as listidtypes, resolve as resolveIDType} from 'phovea_core/src/idtype';
+import {list as listIDTypes, resolve as resolveIDType} from 'phovea_core/src/idtype';
+import {listAll as listAllIDTypes} from 'phovea_core/src/idtype/manager';
 import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor} from './valuetypes';
 import {list} from 'phovea_core/src/plugin';
 import {isInternalIDType} from 'phovea_core/src/idtype/manager';
@@ -27,7 +28,7 @@ interface IPluginResult {
 
 function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   const idtype = (<any>definition).idType || 'Custom';
-  const existing = listidtypes().filter((d) => !isInternalIDType(d));
+  const existing = listIDTypes().filter((d) => !isInternalIDType(d));
 
   return new Promise((resolve) => {
     const dialog = createDialog('Edit IDType', 'idtype', () => {
@@ -100,11 +101,12 @@ function parseIDType(def: ITypeDefinition, data: any[], accessor: (row: any, val
   return [];
 }
 
-function getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: ITypeDefinition): string {
-  const allIDTypes = listidtypes().filter((idType) => !isInternalIDType(idType));
+async function getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: ITypeDefinition): Promise<string> {
+  const allIDTypes = await listAllIDTypes();
+  const allNonInternalIDtypes = allIDTypes.filter((idType) => !isInternalIDType(idType));
 
   return `<optgroup label="Identifier" data-type="${this.id}">
-        ${allIDTypes.map((type) => `<option value="${type.id}" ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n')}
+        ${allNonInternalIDtypes.map((type) => `<option value="${type.id}" ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n')}
     </optgroup>`;
 }
 
