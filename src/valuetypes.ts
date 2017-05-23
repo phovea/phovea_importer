@@ -49,7 +49,7 @@ export interface IValueTypeEditor {
    * @param current current editor
    * @param def definition of the editor. E.g. which type the editor is (and which idType the column has if it is an IDTypeEditor)
    */
-  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition): string;
+  getOptionsMarkup(current: ValueTypeEditor, def: ITypeDefinition): Promise<string>|string;
 }
 
 export function createDialog(title: string, classSuffix: string, onSubmit: ()=>any) {
@@ -539,12 +539,13 @@ export async function guessValueType(editors: ValueTypeEditor[], name: string, i
   return results[0].editor;
 }
 
-export function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, def: ITypeDefinition, emptyOne = true) {
-  const options = editors.map((editor) => editor.getOptionsMarkup(current, def)).join('\n');
+export async function createTypeEditor(editors: ValueTypeEditor[], current: ValueTypeEditor, def: ITypeDefinition, emptyOne = true) {
+  const optionsPromises = editors.map((editor) => editor.getOptionsMarkup(current, def));
+  const options = await Promise.all(optionsPromises);
 
  return `<select class="form-control">
         ${emptyOne? '<option value=""></option>':''}
-        ${options}
+        ${options.join('\n')}
     </select>
     <span class="input-group-btn">
       <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>

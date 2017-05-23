@@ -52,23 +52,33 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
   });
 
   const guessedEditors = await Promise.all(configPromises);
-  const config = await Promise.all(header.map(async (name, i) => ({
-    column: i,
-    name,
-    editor: guessedEditors[i],
-    value: await guessedEditors[i].guessOptions({type: null}, data, (col) => col[i])
-  })));
+  const config = await Promise.all(header.map(async (name, i) => {
+    const value = await guessedEditors[i].guessOptions({type: null}, data, (col) => col[i]);
+    const markup = await createTypeEditor(editors, guessedEditors[i], value);
+    return {
+      column: i,
+      name,
+      color: '#DDDDDD',
+      value,
+      editor: guessedEditors[i],
+      markup
+    };
+  }));
 
   const $rows = $root.select('tbody').selectAll('tr').data(config);
 
-  const $rowsEnter = $rows.enter().append('tr')
-    .html((d) => `
+  function getCellMarkup(d) {
+    return `
       <td>
-        <input type="input" class="form-control" value="${d.name}">
+        <input type="text" class="form-control" value="${d.name}">
       </td>
       <td class="input-group">
-          ${createTypeEditor(editors, d.editor, d.value)}
-      </td>`);
+        ${d.markup}
+      </td>`;
+  }
+
+  const $rowsEnter = $rows.enter().append('tr')
+    .html(getCellMarkup);
   $rowsEnter.select('input').on('change', function (d) {
     d.name = this.value;
   });
