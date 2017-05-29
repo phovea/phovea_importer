@@ -299,11 +299,9 @@ export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinit
 
   return new Promise((resolve) => {
     const dialog = createDialog('Edit Numerical Range', 'numerical', () => {
-      const typeS = (<HTMLInputElement>dialog.body.querySelector('input[name=numerical-type]')).checked ? 'real' : 'int';
       const minR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-min]')).value);
       const maxR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-max]')).value);
       dialog.hide();
-      definition.type = typeS;
       (<any>definition).range = [minR, maxR];
       resolve(definition);
     });
