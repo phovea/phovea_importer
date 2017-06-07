@@ -3,10 +3,10 @@
  */
 
 import {mixin, fixId, randomId, identity} from 'phovea_core/src/index';
-import {retrieve} from 'phovea_core/src/session';
 import * as d3 from 'd3';
 import {ITypeDefinition, ValueTypeEditor, guessValueType, updateType, createTypeEditor} from './valuetypes';
 import {IDataDescription} from 'phovea_core/src/datatype';
+import {currentUserNameOrAnonymous} from 'phovea_core/src/security';
 
 export interface IColumnDefinition {
   name: string;
@@ -91,10 +91,6 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
   return () => ({data, desc: toTableDataDescription(config, data, common)});
 }
 
-function getCurrentUser() {
-  return retrieve('username', 'Anonymous');
-}
-
 function toTableDataDescription(config: IColumnDefinition[], data: any[], common: {name: string, description: string}) {
   //derive all configs
   config = config.filter((c) => (<any>c).editor != null);
@@ -125,7 +121,7 @@ function toTableDataDescription(config: IColumnDefinition[], data: any[], common
     id: fixId(common.name + randomId(2)),
     name: common.name,
     description: common.description,
-    creator: getCurrentUser(),
+    creator: currentUserNameOrAnonymous(),
     ts: Date.now(),
     fqname: 'upload/' + common.name,
     size: [data.length, columns.length],
@@ -213,7 +209,7 @@ export async function importMatrix(editors: ValueTypeEditor[], $root: d3.Selecti
     id: fixId(common.name + randomId(3)),
     name: common.name,
     fqname: 'upload/' + common.name,
-    creator: getCurrentUser(),
+    creator: currentUserNameOrAnonymous(),
     ts: Date.now(),
     description: common.description,
     size: [rows.length, cols.length],
