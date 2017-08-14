@@ -577,7 +577,11 @@ export function updateType(editors: ValueTypeEditor[], emptyOne = true) {
     }
     const isIDType = !type || type.isImplicit;
     const tr = this.parentElement.parentElement;
+
     tr.className = isIDType ? 'info' : '';
-    (<HTMLInputElement>(tr.querySelector('input'))).disabled = isIDType;
+    const input = tr.querySelector('input');
+    if(input) {
+      (<HTMLInputElement>(input)).disabled = isIDType;
+    }
   };
 }
