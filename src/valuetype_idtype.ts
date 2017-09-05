@@ -4,7 +4,7 @@
 
 import {resolve as resolveIDType} from 'phovea_core/src/idtype';
 import {listAll as listAllIDTypes} from 'phovea_core/src/idtype/manager';
-import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor} from './valuetypes';
+import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor, numerical} from './valuetypes';
 import {list} from 'phovea_core/src/plugin';
 import {isInternalIDType} from 'phovea_core/src/idtype/manager';
 
@@ -74,6 +74,13 @@ async function guessIDType(def: ITypeDefinition, data: any[], accessor: (row: an
 }
 
 async function isIDType(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
+  //first check if it is number then it cant be an IDType
+  const isNumber = numerical().isType(name, index, data, accessor, sampleSize);
+  if (isNumber > 0.8) {
+    // pretty sure it is a number
+    return 0;
+  }
+
   const pluginPromise = executePlugins(data, accessor, sampleSize);
   const results = await pluginPromise;
 
