@@ -505,6 +505,7 @@ export async function guessValueType(editors: ValueTypeEditor[], name: string, i
   options = mixin({
     sampleSize: 100,
     thresholds: <any>{
+      idType: 0.7,
       numerical: 0.7,
       categorical: 0.7,
       real: 0.7,
