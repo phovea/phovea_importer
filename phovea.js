@@ -12,7 +12,7 @@ module.exports = function (registry) {
   }, {
     'factory': 'categorical',
     'name': 'Categorical',
-    'priority': 50
+    'priority': 30
   });
 
   registry.push('importer_value_type', 'real', function () {
@@ -44,7 +44,7 @@ module.exports = function (registry) {
   }, {
     'factory': 'idType',
     'name': 'IDType',
-    'priority': 30,
+    'priority': 50,
     'implicit': true
   });
 };
