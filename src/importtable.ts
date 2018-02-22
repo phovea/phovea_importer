@@ -48,7 +48,7 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
     `);
 
   const configPromises = header.map((name, i) => {
-    return guessValueType(editors, name, i, data, (row) => row[i], i);
+    return guessValueType(editors, name, i, data, (row) => row[i]);
   });
 
   const guessedEditors = await Promise.all(configPromises);
