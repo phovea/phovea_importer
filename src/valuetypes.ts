@@ -412,7 +412,7 @@ export function editMatrix(definition: ITypeDefinition): Promise<ITypeDefinition
   const labels = anyDef.labels || [];
 
   return new Promise((resolve) => {
-    const dialog = createDialog('Edit Numerical Range', 'numerical', () => {
+    const dialog = createDialog('Edit Matrix Properties', 'matrix', () => {
       const rangeMin = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name="range-min"]')).value);
       const rangeMax = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name="range-max"]')).value);
       anyDef.range = [rangeMin, rangeMax];
