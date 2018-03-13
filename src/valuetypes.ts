@@ -344,7 +344,7 @@ export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row
       maxV = v;
     }
   });
-  anyDef.range = [isNaN(minV) ? 0: minV, isNaN(maxV) ? 100 : maxV];
+  anyDef.range = [isNaN(minV) ? 0 : minV, isNaN(maxV) ? 100 : maxV];
   return def;
 }
 
@@ -474,7 +474,7 @@ export function guessMatrix(def: ITypeDefinition, data: any[], accessor: (row: a
       if(values.length > maxLength) {
         maxLength = values.length;
       }
-    }catch(e) {
+    } catch(e) {
       return; //skip
     }
   });
@@ -498,7 +498,7 @@ function isMatrix(name: string, index: number, data: any[], accessor: (row: any)
       if (typeof v === 'object') {
         numMatrix++;
       }
-    }catch (e) {
+    } catch (e) {
       //parse failed, it is not a matrix
     }
   }
@@ -512,11 +512,13 @@ function parseMatrix(def: ITypeDefinition, data: any[], accessor: (row: any, val
       const v = JSON.parse(accessor(d));
       if(typeof v === 'object') {
         accessor(d, v);
-      }else {
+      } else {
         invalid.push(i);
+        accessor(d, Array(def.dataLength).fill(NaN));
       }
-    }catch(e) {
+    } catch(e) {
       invalid.push(i);
+      accessor(d, Array(def.dataLength).fill(NaN));
     }
   });
   return invalid;
