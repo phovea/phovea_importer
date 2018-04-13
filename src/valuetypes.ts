@@ -344,7 +344,7 @@ export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row
       maxV = v;
     }
   });
-  anyDef.range = [isNaN(minV) ? 0: minV, isNaN(maxV) ? 100 : maxV];
+  anyDef.range = [isNaN(minV) ? 0 : minV, isNaN(maxV) ? 100 : maxV];
   return def;
 }
 
@@ -395,6 +395,141 @@ export function numerical(): IValueTypeEditor {
     parse: parseNumerical,
     guessOptions: guessNumerical,
     edit: editNumerical,
+    getOptionsMarkup: singleOption
+  };
+}
+
+/**
+ * edits the given type definition in place with matrix properties
+ * @param definition call by reference argument
+ * @return {Promise<R>|Promise}
+ */
+export function editMatrix(definition: ITypeDefinition): Promise<ITypeDefinition> {
+  const anyDef: any = definition;
+  const range = anyDef.range || [0, 100];
+  const dataLength = anyDef.dataLength || 0;
+  const colorRange = anyDef.colorRange || ['#FFFFFF', '#000000'];
+  const labels = anyDef.labels || [];
+
+  return new Promise((resolve) => {
+    const dialog = createDialog('Edit Matrix Properties', 'matrix', () => {
+      const rangeMin = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name="range-min"]')).value);
+      const rangeMax = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name="range-max"]')).value);
+      anyDef.range = [rangeMin, rangeMax];
+      anyDef.dataLength = parseInt((<HTMLInputElement>dialog.body.querySelector('input[name="datalength"]')).value, 10);
+      const colorRangeMin = (<HTMLInputElement>dialog.body.querySelector('input[name="colorrange-min"]')).value;
+      const colorRangeMax = (<HTMLInputElement>dialog.body.querySelector('input[name="colorrange-max"]')).value;
+      anyDef.colorRange = [colorRangeMin, colorRangeMax];
+      anyDef.labels = (<HTMLInputElement>dialog.body.querySelector('textarea[name="labels"]')).value.split('\n');
+      dialog.hide();
+      resolve(definition);
+    });
+    dialog.body.innerHTML = `
+        <div class="form-group">
+          <label>Minimum Value</label>
+          <input type="number" class="form-control" name="range-min" step="any" value="${range[0]}">
+        </div>
+        <div class="form-group">
+          <label>Maximum Value</label>
+          <input type="number" class="form-control" name="range-max" step="any" value="${range[1]}">
+        </div>
+        <div class="form-group">
+          <label>Length of Data</label>
+          <input type="number" class="form-control" name="datalength" step="1" min="0" value="${dataLength}">
+        </div>
+        <div class="form-group">
+          <label>Color of Minimum Value</label>
+          <input type="color" class="form-control" name="colorrange-min" value="${colorRange[0]}">
+        </div>
+        <div class="form-group">
+          <label>Color of Maximum Value</label>
+          <input type="color" class="form-control" name="colorrange-max" value="${colorRange[1]}">
+        </div>
+        <div class="form-group">
+          <label>Labels</label>
+          <textarea class="form-control" name="labels">${labels.join('\n')}</textarea>
+        </div>
+    `;
+    dialog.show();
+  });
+}
+
+export function guessMatrix(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
+  const anyDef: any = def;
+  let minV = NaN;
+  let maxV = NaN;
+  let maxLength = 0;
+  data.forEach((row) => {
+    try {
+      const values = JSON.parse(accessor(row));
+      values.forEach((raw, i) => {
+        const v = parseFloat(raw);
+        if (isNaN(minV) || v < minV) {
+          minV = v;
+        }
+        if (isNaN(maxV) || v > maxV) {
+          maxV = v;
+        }
+      });
+      if(values.length > maxLength) {
+        maxLength = values.length;
+      }
+    } catch(e) {
+      return; //skip
+    }
+  });
+  anyDef.range = [isNaN(minV) ? 0: minV, isNaN(maxV) ? 100 : maxV];
+  anyDef.dataLength = maxLength;
+  anyDef.colorRange = ['#FFFFFF', '#000000'];
+  anyDef.labels = Array.from(Array(maxLength).keys());
+  return def;
+}
+
+function isMatrix(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
+  const testSize = Math.min(data.length, sampleSize);
+  if (testSize <= 0) {
+    return 0;
+  }
+  let numMatrix = 0;
+
+  for (let i = 0; i < testSize; ++i) {
+    try {
+      const v = JSON.parse(accessor(data[i]));
+      if (typeof v === 'object') {
+        numMatrix++;
+      }
+    } catch (e) {
+      //parse failed, it is not a matrix
+    }
+  }
+  return numMatrix / testSize;
+}
+
+function parseMatrix(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string) {
+  const invalid = [];
+  data.forEach((d, i) => {
+    try {
+      const v = JSON.parse(accessor(d));
+      if(typeof v === 'object') {
+        accessor(d, v);
+      } else {
+        invalid.push(i);
+        accessor(d, Array(def.dataLength).fill(NaN));
+      }
+    } catch(e) {
+      invalid.push(i);
+      accessor(d, Array(def.dataLength).fill(NaN));
+    }
+  });
+  return invalid;
+}
+
+export function matrix(): IValueTypeEditor {
+  return {
+    isType: isMatrix,
+    parse: parseMatrix,
+    guessOptions: guessMatrix,
+    edit: editMatrix,
     getOptionsMarkup: singleOption
   };
 }

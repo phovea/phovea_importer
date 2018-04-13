@@ -47,5 +47,13 @@ module.exports = function (registry) {
     'priority': 50,
     'implicit': true
   });
+
+  registry.push('importer_value_type', 'matrix', function () {
+    return System.import('./src/valuetypes');
+  }, {
+    'factory': 'matrix',
+    'name': 'Matrix',
+    'priority': 5
+  });
 };
 
