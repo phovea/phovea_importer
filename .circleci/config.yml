@@ -3,23 +3,44 @@ jobs:
   build:
     working_directory: ~/phovea
     docker:
-      - image: circleci/node:6-browsers
+      - image: circleci/node:8-browsers
     steps:
       - checkout
       - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          key: deps1-{{ checksum "package.json" }}
       - run:
           name: install-npm-wee
           command: npm install
+      - run: #remove all resolved github dependencies
+          name: delete-vcs-dependencies
+          command: |
+            (grep -l '._resolved.: .\(git[^:]*\|bitbucket\):' ./node_modules/*/package.json || true) | xargs -r dirname | xargs -r rm -rf
       - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          key: deps1-{{ checksum "package.json" }}
           paths:
-            - ./node_modules
-      - run: #force update of dynamic dependencies
-          name: update-vcs-dependencies
-          command: npm update
+          - ./node_modules
+      - run: #install all dependencies
+          name: install-npm-wee2
+          command: npm install
       - run:
           name: dist
           command: npm run dist
       - store_artifacts:
           path: dist
+
+workflows:
+  version: 2
+  build-branch:
+    jobs:
+      - build:
+          filters:
+            tags:
+              ignore: /^v.*/
+  build-tag:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
