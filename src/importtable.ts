@@ -42,7 +42,7 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
           <th>Type</th>
         </thead>
         <tbody>
-                
+
         </tbody>
       </table>
     `);
