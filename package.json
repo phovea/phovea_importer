@@ -75,7 +75,7 @@
     "d3": "3.5.17"
   },
   "name": "phovea_importer",
-  "description": "Flexible Smart and Visual Data Importer for Web Based Visualization",
+  "description": "Flexible smart and visual data importer for web based visualization",
   "homepage": "https://github.com/Caleydo/caleydo_importer",
   "version": "3.1.0",
   "author": {
