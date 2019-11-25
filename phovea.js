@@ -47,5 +47,17 @@ module.exports = function (registry) {
     'priority': 50,
     'implicit': true
   });
+
+  registry.push('epPhoveaCoreLocale', 'phoveaCoreLocaleEN', function () {
+    return System.import('./src/assets/locales/en/phovea.json').then(function (json) {
+      return {
+        create: () => json
+      };
+    });
+  }, {
+    order: 0,
+    ns: 'phovea',
+    lng: 'en'
+  });
 };
 
