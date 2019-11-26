@@ -7,7 +7,7 @@ import {listAll as listAllIDTypes} from 'phovea_core/src/idtype/manager';
 import {ITypeDefinition, IValueTypeEditor, createDialog, ValueTypeEditor, numerical} from './valuetypes';
 import {list} from 'phovea_core/src/plugin';
 import {isInternalIDType} from 'phovea_core/src/idtype/manager';
-import i18next from 'phovea_core/src/i18n';
+import i18n from 'phovea_core/src/i18n';
 
 /**
  * edits the given type definition in place with idtype properties
@@ -33,7 +33,7 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
   return new Promise(async (resolve) => {
     const existing = await listAllIDTypes();
     const existingFiltered = existing.filter((d) => !isInternalIDType(d));
-    const dialog = createDialog(i18next.t('phovea:importer.editIdType'), 'idtype', () => {
+    const dialog = createDialog(i18n.t('phovea:importer.editIdType'), 'idtype', () => {
 
       const value = (<HTMLInputElement>dialog.body.querySelector('input')).value;
       const existingIDType = existingFiltered.find((idType) => idType.id === value);
@@ -48,7 +48,7 @@ function editIDType(definition: ITypeDefinition): Promise<ITypeDefinition> {
     });
     dialog.body.innerHTML = `
         <div class="form-group">
-          <label for="idType_new">${i18next.t('phovea:importer.dialogLabel')}</label>
+          <label for="idType_new">${i18n.t('phovea:importer.dialogLabel')}</label>
           <input type="text" class="form-control" id="idType_new" value="${existingFiltered.some((i) => i.id === idtype) ? '' : idtype}">
         </div>
     `;
@@ -114,7 +114,7 @@ async function getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: I
   const allIDTypes = await listAllIDTypes();
   const allNonInternalIDtypes = allIDTypes.filter((idType) => !isInternalIDType(idType));
 
-  return `<optgroup label="${i18next.t('phovea:importer.identifier')}" data-type="${this.id}">
+  return `<optgroup label="${i18n.t('phovea:importer.optionLabel')}" data-type="${this.id}">
         ${allNonInternalIDtypes.map((type) => `<option value="${type.id}" ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n')}
     </optgroup>`;
 }

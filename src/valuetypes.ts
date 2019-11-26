@@ -5,7 +5,7 @@
 import {generateDialog} from 'phovea_ui/src/dialogs';
 import {list as listPlugins, load as loadPlugins, IPlugin, get as getPlugin} from 'phovea_core/src/plugin';
 import {mixin} from 'phovea_core/src/index';
-import i18next from 'phovea_core/src/i18n';
+import i18n from 'phovea_core/src/i18n';
 
 //https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category10
 const categoryColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
@@ -54,7 +54,7 @@ export interface IValueTypeEditor {
 }
 
 export function createDialog(title: string, classSuffix: string, onSubmit: () => any) {
-  const dialog = generateDialog(title, i18next.t('phovea:importer.save'));
+  const dialog = generateDialog(title, i18n.t('phovea:importer.save'));
   dialog.body.classList.add('caleydo-importer-' + classSuffix);
   const form = dialog.body.ownerDocument.createElement('form');
   dialog.body.appendChild(form);
@@ -81,7 +81,7 @@ function editString(definition: ITypeDefinition) {
   const regexTo = def.regexTo || null;
 
   return new Promise((resolve) => {
-    const dialog = createDialog(i18next.t('phovea:importer.editStringConversion'), 'string', () => {
+    const dialog = createDialog(i18n.t('phovea:importer.editStringConversion'), 'string', () => {
       dialog.hide();
       definition.type = 'string';
       def.convert = findSelectedRadio();
@@ -92,35 +92,35 @@ function editString(definition: ITypeDefinition) {
     });
     dialog.body.innerHTML = `
         <div class="form-group">
-          <label>${i18next.t('phovea:importer.textConversion')}</label>
+          <label>${i18n.t('phovea:importer.textConversion')}</label>
 
           <div class="radio">
             <label class="radio">
-              <input type="radio" name="string-convert" value="" ${!convert ? 'checked="checked"' : ''}> ${i18next.t('phovea:importer.none')}
+              <input type="radio" name="string-convert" value="" ${!convert ? 'checked="checked"' : ''}> ${i18n.t('phovea:importer.none')}
             </label>
            </div>
           <div class="radio">
             <label class="radio">
-              <input type="radio" name="string-convert" value="toUpperCase" ${convert === 'toUpperCase' ? 'checked="checked"' : ''}> ${i18next.t('phovea:importer.upperCase')}
+              <input type="radio" name="string-convert" value="toUpperCase" ${convert === 'toUpperCase' ? 'checked="checked"' : ''}> ${i18n.t('phovea:importer.upperCase')}
             </label>
            </div>
           <div class="radio">
             <label class="radio">
-              <input type="radio" name="string-convert" value="toLowerCase" ${convert === 'toLowerCase' ? 'checked="checked"' : ''}> ${i18next.t('phovea:importer.lowerCase')}
+              <input type="radio" name="string-convert" value="toLowerCase" ${convert === 'toLowerCase' ? 'checked="checked"' : ''}> ${i18n.t('phovea:importer.lowerCase')}
             </label>
            </div>
           <div class="radio">
             <label class="radio">
-              <input type="radio" name="string-convert" value="regex" ${convert === 'regex"' ? 'checked="checked"' : ''}> ${i18next.t('phovea:importer.regexReplacement')}
+              <input type="radio" name="string-convert" value="regex" ${convert === 'regex"' ? 'checked="checked"' : ''}> ${i18n.t('phovea:importer.regexReplacement')}
             </label>
            </div>
           </div>
           <div class="form-group">
-            <label for="regexFrom">${i18next.t('phovea:importer.regexSearchExpression')}</label>
+            <label for="regexFrom">${i18n.t('phovea:importer.regexSearchExpression')}</label>
             <input type="text" class="form-control" ${convert !== 'regex' ? 'disabled="disabled"' : ''} name="regexFrom" value="${regexFrom || ''}">
           </div>
           <div class="form-group">
-            <label for="regexTo">${i18next.t('phovea:importer.regexReplacementExpression')}</label>
+            <label for="regexTo">${i18n.t('phovea:importer.regexReplacementExpression')}</label>
             <input type="text" class="form-control"  ${convert !== 'regex' ? 'disabled="disabled"' : ''} name="regexTo" value="${regexTo || ''}">
           </div>
     `;
@@ -196,7 +196,7 @@ function editCategorical(definition: ITypeDefinition) {
   const cats = (<any>definition).categories || [];
 
   return new Promise((resolve) => {
-    const dialog = createDialog(i18next.t('phovea:importer.editCategories'), 'categorical', () => {
+    const dialog = createDialog(i18n.t('phovea:importer.editCategories'), 'categorical', () => {
       const text = (<HTMLTextAreaElement>dialog.body.querySelector('textarea')).value;
       const categories = text.trim().split('\n').map((row) => {
         const l = row.trim().split('\t');
@@ -299,7 +299,7 @@ export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinit
   const range = (<any>definition).range || [0, 100];
 
   return new Promise((resolve) => {
-    const dialog = createDialog(i18next.t('phovea:importer.editNumerical'), 'numerical', () => {
+    const dialog = createDialog(i18n.t('phovea:importer.editNumerical'), 'numerical', () => {
       const minR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-min]')).value);
       const maxR = parseFloat((<HTMLInputElement>dialog.body.querySelector('input[name=numerical-max]')).value);
       dialog.hide();
@@ -308,11 +308,11 @@ export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinit
     });
     dialog.body.innerHTML = `
         <div class="form-group">
-          <label for="minRange">${i18next.t('phovea:importer.minimumValue')}</label>
+          <label for="minRange">${i18n.t('phovea:importer.minimumValue')}</label>
           <input type="number" class="form-control" name="numerical-min" step="any" value="${range[0]}">
         </div>
         <div class="form-group">
-          <label for="maxRange">${i18next.t('phovea:importer.maximumValue')}</label>
+          <label for="maxRange">${i18n.t('phovea:importer.maximumValue')}</label>
           <input type="number" class="form-control" name="numerical-max" step="any" value="${range[1]}">
         </div>
     `;

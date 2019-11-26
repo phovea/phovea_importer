@@ -7,7 +7,7 @@ import * as d3 from 'd3';
 import {ITypeDefinition, ValueTypeEditor, guessValueType, updateType, createTypeEditor} from './valuetypes';
 import {IDataDescription} from 'phovea_core/src/datatype';
 import {currentUserNameOrAnonymous} from 'phovea_core/src/security';
-import i18next from 'phovea_core/src/i18n';
+import i18n from 'phovea_core/src/i18n';
 export interface IColumnDefinition {
   name: string;
   column: string | number;
@@ -18,11 +18,11 @@ function commonFields(name: string) {
   const prefix = 'i' + randomId(3);
   return `
     <div class="form-group">
-      <label for="${prefix}_name">${i18next.t('phovea:importer.name')}</label>
+      <label for="${prefix}_name">${i18n.t('phovea:importer.name')}</label>
       <input type="text" class="form-control" id="${prefix}_name" name="name" value="${name}" required="required">
     </div>
     <div class="form-group">
-      <label for="${prefix}_desc">${i18next.t('phovea:importer.description')}</label>
+      <label for="${prefix}_desc">${i18n.t('phovea:importer.description')}</label>
       <textarea class="form-control" id="${prefix}_desc" name="desc" rows="3"></textarea>
     </div>`;
 }
@@ -38,8 +38,8 @@ export async function importTable(editors: ValueTypeEditor[], $root: d3.Selectio
   $root.html(`${commonFields(name)}
       <table class="table table-striped table-condensed">
         <thead>
-          <th>${i18next.t('phovea:importer.column')}</th>
-          <th>${i18next.t('phovea:importer.type')}</th>
+          <th>${i18n.t('phovea:importer.column')}</th>
+          <th>${i18n.t('phovea:importer.type')}</th>
         </thead>
         <tbody>
 
@@ -154,21 +154,21 @@ export async function importMatrix(editors: ValueTypeEditor[], $root: d3.Selecti
   const editor = await guessValueType(editors, 'value', -1, dataRange, byIndex);
   const configs = [{
     column: -1,
-    name: i18next.t('phovea:importer.rowName'),
+    name: i18n.t('phovea:importer.rowName'),
     value: {
       type: 'idType'
     },
     editor: editors.filter((e) => e.id === 'idType')[0]
   }, {
     column: -1,
-    name: i18next.t('phovea:importer.columnName'),
+    name: i18n.t('phovea:importer.columnName'),
     value: {
       type: 'idType'
     },
     editor: editors.filter((e) => e.id === 'idType')[0]
   }, {
     column: -1,
-    name: i18next.t('phovea:importer.value'),
+    name: i18n.t('phovea:importer.value'),
     value: {
       type: null
     },
