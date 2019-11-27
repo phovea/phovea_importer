@@ -5,13 +5,13 @@
     "author": "The Caleydo Team",
     "githubAccount": "phovea",
     "libraries": [
-      "papaparse",
-      "d3"
+      "d3",
+      "papaparse"
     ],
     "modules": [
       "phovea_core",
-      "phovea_ui",
-      "phovea_d3"
+      "phovea_d3",
+      "phovea_ui"
     ],
     "extensions": [
       {
@@ -73,10 +73,16 @@
     "ignores": [],
     "today": "Tue, 01 Nov 2016 15:57:01 GMT",
     "libraryExternals": [
-      "papaparse",
       "d3",
+      "papaparse",
       "jquery",
       "font-awesome"
-    ]
+    ],
+    "promptValues": {
+      "authorName": "The Caleydo Team",
+      "authorEmail": "contact@caleydo.org",
+      "authorUrl": "https://caleydo.org",
+      "githubAccount": "phovea"
+    }
   }
 }
