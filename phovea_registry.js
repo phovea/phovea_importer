@@ -5,13 +5,14 @@
  **************************************************************************** */
 
 import {register} from 'phovea_core/src/plugin';
+import reg from './src/phovea';
 
 /**
  * build a registry by registering all phovea modules
  */
 //other modules
 import 'phovea_core/phovea_registry.js';
-import 'phovea_ui/phovea_registry.js';
 import 'phovea_d3/phovea_registry.js';
+import 'phovea_ui/phovea_registry.js';
 //self
-register('phovea_importer',require('./phovea.js'));
+register('phovea_importer', reg);
