@@ -47,7 +47,7 @@
     "release:minor": "npm version minor && npm publish && git push --follow-tags",
     "release:patch": "npm version patch && npm publish && git push --follow-tags",
     "predist": "npm run build && npm run docs",
-    "dist": "mkdirp dist && cd build && tar cvzf ../dist/phovea_importer.tar.gz *"
+    "dist": "mkdir dist && cd build && tar cvzf ../dist/phovea_importer.tar.gz *"
   },
   "devDependencies": {
     "@types/jasmine": "2.5.47",
@@ -78,7 +78,6 @@
     "url-loader": "0.5.8",
     "webpack": "2.3.3",
     "webpack-dev-server": "2.4.2",
-    "mkdirp": "0.5.1",
     "extract-loader": "0.1.0",
     "cache-loader": "1.2.0",
     "ifdef-loader": "2.0.0",
