@@ -91,8 +91,8 @@
     "@types/papaparse": "~4.5.3",
     "d3": "~3.5.17",
     "papaparse": "~4.6.0",
-    "phovea_core": "github:phovea/phovea_core#typescript_3.8",
-    "phovea_d3": "github:phovea/phovea_d3#typescript_3.8",
-    "phovea_ui": "github:phovea/phovea_ui#typescript_3.8"
+    "phovea_core": "github:phovea/phovea_core#develop",
+    "phovea_d3": "github:phovea/phovea_d3#develop",
+    "phovea_ui": "github:phovea/phovea_ui#develop"
   }
 }
