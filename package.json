@@ -90,8 +90,8 @@
     "@types/papaparse": "~5.0.3",
     "d3": "~3.5.17",
     "papaparse": "~5.1.1",
-    "phovea_core": "github:phovea/phovea_core#update_dependencies_38",
-    "phovea_d3": "github:phovea/phovea_d3#update_dependencies_38",
-    "phovea_ui": "github:phovea/phovea_ui#update_dependencies_38"
+    "phovea_core": "github:phovea/phovea_core#update_dep_req",
+    "phovea_d3": "github:phovea/phovea_d3#update_dep_req",
+    "phovea_ui": "github:phovea/phovea_ui#update_dep_req"
   }
 }
