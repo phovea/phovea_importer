@@ -47,7 +47,7 @@ export interface IImporterOptions {
 }
 
 export class Importer extends EventHandler {
-  private options : IImporterOptions = {
+  private options: IImporterOptions = {
     type: 'table'
   };
   private $parent: d3.Selection<any>;
