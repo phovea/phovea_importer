@@ -1,7 +1,7 @@
 {
   "name": "phovea_importer",
   "description": "Flexible smart and visual data importer for web based visualization",
-  "homepage": "https://github.com/phovea/phovea_importer",
+  "homepage": "https://phovea.caleydo.org",
   "version": "5.0.1-SNAPSHOT",
   "author": {
     "name": "The Caleydo Team",
