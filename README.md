@@ -1,5 +1,7 @@
-phovea_importer [![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+phovea_importer
 =====================
+[![Phovea][phovea-image]][phovea-url] [![NPM version][npm-image]][npm-url] [![Build Status][circleci-image]][circleci-url]
+
 
 Flexible Smart and Visual Data Importer for Web Based Visualization
 
@@ -40,5 +42,3 @@ This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform 
 [npm-url]: https://npmjs.org/package/phovea_importer
 [circleci-image]: https://circleci.com/gh/phovea/phovea_importer.svg?style=shield
 [circleci-url]: https://circleci.com/gh/phovea/phovea_importer
-[daviddm-image]: https://david-dm.org/phovea/phovea_importer/status.svg
-[daviddm-url]: https://david-dm.org/phovea/phovea_importer
