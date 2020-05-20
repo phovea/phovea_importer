@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {generateDialog} from 'phovea_ui/src/dialogs';
+import {Dialog} from 'phovea_ui/src/dialogs';
 import {list as listPlugins, load as loadPlugins, IPlugin, get as getPlugin} from 'phovea_core/src/plugin';
 import {mixin} from 'phovea_core/src/index';
 import i18n from 'phovea_core/src/i18n';
@@ -54,7 +54,7 @@ export interface IValueTypeEditor {
 }
 
 export function createDialog(title: string, classSuffix: string, onSubmit: () => any) {
-  const dialog = generateDialog(title, i18n.t('phovea:importer.save'));
+  const dialog = Dialog.generateDialog(title, i18n.t('phovea:importer.save'));
   dialog.body.classList.add('caleydo-importer-' + classSuffix);
   const form = dialog.body.ownerDocument.createElement('form');
   dialog.body.appendChild(form);
