@@ -11,34 +11,6 @@ import {createValueTypeEditors} from './valuetypes';
 import {IDataDescription} from 'phovea_core/src/datatype';
 import {importTable, importMatrix} from './importtable';
 
-export function selectFileLogic($dropZone: d3.Selection<any>, $files: d3.Selection<any>, onFileSelected: (file: File)=>any, overCssClass = 'over') {
-  function over() {
-    const e = <Event>(<any>d3.event);
-    e.stopPropagation();
-    e.preventDefault();
-    const s = (<HTMLElement>e.target).classList;
-    if (e.type === 'dragover') {
-      s.add(overCssClass);
-    } else {
-      s.remove(overCssClass);
-    }
-  }
-
-  function select() {
-    over();
-    const e: any = d3.event;
-    //either drop or file select
-    const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-    if (files.length > 0) {
-      //just the first file for now
-      onFileSelected(files[0]);
-    }
-  }
-
-  $files.on('change', select);
-  $dropZone.on('dragover', over).on('dragleave', over).on('drop', select);
-}
-
 export interface IImporterOptions {
   /**
    * type to import: table,matrix
@@ -93,15 +65,44 @@ export class Importer extends EventHandler {
       </div>
     `);
 
-    selectFileLogic($root.select('div.drop-zone'), $root.select('input[type=file]'), this.selectedFile.bind(this));
+    Importer.selectFileLogic($root.select('div.drop-zone'), $root.select('input[type=file]'), this.selectedFile.bind(this));
   }
 
   getResult() {
     return this.builder ? this.builder() : null;
   }
+
+  static createImporter(parent: Element, options: IImporterOptions = {}) {
+    return new Importer(parent, options);
+  }
+
+  static selectFileLogic($dropZone: d3.Selection<any>, $files: d3.Selection<any>, onFileSelected: (file: File)=>any, overCssClass = 'over') {
+    function over() {
+      const e = <Event>(<any>d3.event);
+      e.stopPropagation();
+      e.preventDefault();
+      const s = (<HTMLElement>e.target).classList;
+      if (e.type === 'dragover') {
+        s.add(overCssClass);
+      } else {
+        s.remove(overCssClass);
+      }
+    }
+
+    function select() {
+      over();
+      const e: any = d3.event;
+      //either drop or file select
+      const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+      if (files.length > 0) {
+        //just the first file for now
+        onFileSelected(files[0]);
+      }
+    }
+
+    $files.on('change', select);
+    $dropZone.on('dragover', over).on('dragleave', over).on('drop', select);
+  }
 }
 
 
-export function createImporter(parent: Element, options: IImporterOptions = {}) {
-  return new Importer(parent, options);
-}
