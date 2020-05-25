@@ -1,5 +1,5 @@
 export * from './Importer';
-export * from './importtable';
+export * from './ImportUtils';
 export * from './parser';
 export {default} from './phovea';
 export * from './valuetype_idtype';

@@ -7,9 +7,9 @@ import {mixin} from 'phovea_core/src/index';
 import {EventHandler} from 'phovea_core/src/event';
 import {parseCSV} from './parser';
 import * as d3 from 'd3';
-import {createValueTypeEditors} from './valuetypes';
+import {ValueTypeEditor} from './valuetypes';
 import {IDataDescription} from 'phovea_core/src/datatype';
-import {importTable, importMatrix} from './importtable';
+import {ImportUtils} from './ImportUtils';
 
 export interface IImporterOptions {
   /**
@@ -38,19 +38,19 @@ export class Importer extends EventHandler {
     let name = file.name;
     name = name.substring(0, name.lastIndexOf('.')); //remove .csv
 
-    Promise.all([<any>parseCSV(file), createValueTypeEditors()]).then((results) => {
+    Promise.all([<any>parseCSV(file), ValueTypeEditor.createValueTypeEditors()]).then((results) => {
       const editors = results[1];
       const data = results[0].data;
       const header = data.shift();
 
       switch(this.options.type) {
         case 'matrix':
-          importMatrix(editors, this.$parent, header, data, name).then((b) => {
+          ImportUtils.importMatrix(editors, this.$parent, header, data, name).then((b) => {
             this.builder = b;
           });
           break;
         default:
-          importTable(editors, this.$parent, header, data, name).then((b) => {
+          ImportUtils.importTable(editors, this.$parent, header, data, name).then((b) => {
             this.builder = b;
           });
           break;
