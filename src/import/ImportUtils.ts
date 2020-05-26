@@ -4,7 +4,7 @@
 
 import {BaseUtils} from 'phovea_core';
 import * as d3 from 'd3';
-import {ITypeDefinition, ValueTypeEditor, ValueTypeUtils} from './valuetypes';
+import {ITypeDefinition, ValueTypeEditor, ValueTypeUtils} from '../valuetype/valuetypes';
 import {IDataDescription} from 'phovea_core';
 import {UserSession} from 'phovea_core';
 import {I18nextManager} from 'phovea_core';

@@ -6,7 +6,7 @@ import { BaseUtils } from 'phovea_core';
 import { EventHandler } from 'phovea_core';
 import { parseCSV } from './parser';
 import * as d3 from 'd3';
-import { ValueTypeEditor } from './valuetypes';
+import { ValueTypeEditor } from '../valuetype/valuetypes';
 import { ImportUtils } from './ImportUtils';
 export class Importer extends EventHandler {
     constructor(parent, options = {}) {

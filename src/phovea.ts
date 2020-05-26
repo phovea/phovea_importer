@@ -4,7 +4,7 @@ import {LocaleExtensionPointDesc, ILocaleEPDesc} from 'phovea_core';
 export default function (registry: IRegistry) {
   //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
   registry.push('importer_value_type', 'categorical', function () {
-    return import('./valuetypes');
+    return import('./valuetype/valuetypes');
   }, {
     'factory': 'categorical',
     'name': 'Categorical',
@@ -12,7 +12,7 @@ export default function (registry: IRegistry) {
   });
 
   registry.push('importer_value_type', 'real', function () {
-    return import('./valuetypes');
+    return import('./valuetype/valuetypes');
   }, {
     'factory': 'numerical',
     'name': 'Float',
@@ -20,7 +20,7 @@ export default function (registry: IRegistry) {
   });
 
   registry.push('importer_value_type', 'int', function () {
-    return import('./valuetypes');
+    return import('./valuetype/valuetypes');
   }, {
     'factory': 'numerical',
     'name': 'Integer',
@@ -28,7 +28,7 @@ export default function (registry: IRegistry) {
   });
 
   registry.push('importer_value_type', 'string', function () {
-    return import('./valuetypes');
+    return import('./valuetype/valuetypes');
   }, {
     'factory': 'string_',
     'name': 'String',
@@ -36,7 +36,7 @@ export default function (registry: IRegistry) {
   });
 
   registry.push('importer_value_type', 'idType', function () {
-    return import('./valuetype_idtype');
+    return import('./valuetype/valuetype_idtype');
   }, {
     'factory': 'idType',
     'name': 'IDType',

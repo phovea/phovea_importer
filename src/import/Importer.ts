@@ -7,7 +7,7 @@ import {BaseUtils} from 'phovea_core';
 import {EventHandler} from 'phovea_core';
 import {parseCSV} from './parser';
 import * as d3 from 'd3';
-import {ValueTypeEditor} from './valuetypes';
+import {ValueTypeEditor} from '../valuetype/valuetypes';
 import {IDataDescription} from 'phovea_core';
 import {ImportUtils} from './ImportUtils';
 
