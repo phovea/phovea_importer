@@ -2,12 +2,10 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {resolve as resolveIDType} from 'phovea_core';
-import {listAll as listAllIDTypes} from 'phovea_core';
+import {IDTypeManager} from 'phovea_core';
 import {ITypeDefinition, IValueTypeEditor, ValueTypeUtils, ValueTypeEditor} from './valuetypes';
-import {list} from 'phovea_core';
-import {isInternalIDType} from 'phovea_core';
-import i18n from 'phovea_core';
+import {PluginRegistry} from 'phovea_core';
+import {I18nextManager} from 'phovea_core';
 
 /**
  * edits the given type definition in place with idtype properties
@@ -31,9 +29,9 @@ export class IDTypeUtils {
     const idtype = (<any>definition).idType || 'Custom';
 
     return new Promise(async (resolve) => {
-      const existing = await listAllIDTypes();
-      const existingFiltered = existing.filter((d) => !isInternalIDType(d));
-      const dialog = ValueTypeUtils.createDialog(i18n.t('phovea:importer.editIdType'), 'idtype', () => {
+      const existing = await IDTypeManager.getInstance().listAllIdTypes();
+      const existingFiltered = existing.filter((d) => !IDTypeManager.getInstance().isInternalIDType(d));
+      const dialog = ValueTypeUtils.createDialog(I18nextManager.getInstance().i18n.t('phovea:importer.editIdType'), 'idtype', () => {
 
         const value = (<HTMLInputElement>dialog.body.querySelector('input')).value;
         const existingIDType = existingFiltered.find((idType) => idType.id === value);
@@ -43,12 +41,12 @@ export class IDTypeUtils {
         definition.type = 'idType';
         (<any>definition).idType = idType;
 
-        resolveIDType(idType);
+        IDTypeManager.getInstance().resolveIdType(idType);
         resolve(definition);
       });
       dialog.body.innerHTML = `
           <div class="form-group">
-            <label for="idType_new">${i18n.t('phovea:importer.dialogLabel')}</label>
+            <label for="idType_new">${I18nextManager.getInstance().i18n.t('phovea:importer.dialogLabel')}</label>
             <input type="text" class="form-control" id="idType_new" value="${existingFiltered.some((i) => i.id === idtype) ? '' : idtype}">
           </div>
       `;
@@ -91,7 +89,7 @@ export class IDTypeUtils {
   }
 
   static async executePlugins(data: any[], accessor: (row: any) => string, sampleSize: number): Promise<IPluginResult[]> {
-    const results = list(EXTENSION_POINT).map(async (pluginDesc) => {
+    const results = PluginRegistry.getInstance().listPlugins(EXTENSION_POINT).map(async (pluginDesc) => {
       const factory = await pluginDesc.load();
       const options = pluginDesc.options ? pluginDesc.options : null;
       const plugin: IIDTypeDetector = factory.factory();
@@ -111,10 +109,10 @@ export class IDTypeUtils {
   }
 
   static async getMarkup(this: ValueTypeEditor, current: ValueTypeEditor, def: ITypeDefinition): Promise<string> {
-    const allIDTypes = await listAllIDTypes();
-    const allNonInternalIDtypes = allIDTypes.filter((idType) => !isInternalIDType(idType));
+    const allIDTypes = await IDTypeManager.getInstance().listAllIdTypes();
+    const allNonInternalIDtypes = allIDTypes.filter((idType) => !IDTypeManager.getInstance().isInternalIDType(idType));
 
-    return `<optgroup label="${i18n.t('phovea:importer.optionLabel')}" data-type="${this.id}">
+    return `<optgroup label="${I18nextManager.getInstance().i18n.t('phovea:importer.optionLabel')}" data-type="${this.id}">
           ${allNonInternalIDtypes.map((type) => `<option value="${type.id}" ${current && current.id === this.id && type.name === def.idType ? 'selected="selected"' : ''}>${type.name}</option>`).join('\n')}
       </optgroup>`;
   }

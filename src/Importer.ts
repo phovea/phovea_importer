@@ -3,7 +3,7 @@
  */
 
 import './style.scss';
-import {mixin} from 'phovea_core';
+import {BaseUtils} from 'phovea_core';
 import {EventHandler} from 'phovea_core';
 import {parseCSV} from './parser';
 import * as d3 from 'd3';
@@ -28,7 +28,7 @@ export class Importer extends EventHandler {
 
   constructor(parent: Element, options: IImporterOptions = {}) {
     super();
-    mixin(this.options, options);
+    BaseUtils.mixin(this.options, options);
     this.$parent = d3.select(parent).append('div').classed('caleydo-importer', true);
 
     this.build(this.$parent);

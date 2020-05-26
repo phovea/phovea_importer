@@ -2,12 +2,12 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {mixin, fixId, randomId, identity} from 'phovea_core';
+import {BaseUtils} from 'phovea_core';
 import * as d3 from 'd3';
 import {ITypeDefinition, ValueTypeEditor, ValueTypeUtils} from './valuetypes';
 import {IDataDescription} from 'phovea_core';
-import {currentUserNameOrAnonymous} from 'phovea_core';
-import i18n from 'phovea_core';
+import {UserSession} from 'phovea_core';
+import {I18nextManager} from 'phovea_core';
 
 export interface IColumnDefinition {
   name: string;
@@ -17,14 +17,14 @@ export interface IColumnDefinition {
 
 export class ImportUtils {
   static commonFields(name: string) {
-    const prefix = 'i' + randomId(3);
+    const prefix = 'i' + BaseUtils.randomId(3);
     return `
       <div class="form-group">
-        <label for="${prefix}_name">${i18n.t('phovea:importer.name')}</label>
+        <label for="${prefix}_name">${I18nextManager.getInstance().i18n.t('phovea:importer.name')}</label>
         <input type="text" class="form-control" id="${prefix}_name" name="name" value="${name}" required="required">
       </div>
       <div class="form-group">
-        <label for="${prefix}_desc">${i18n.t('phovea:importer.description')}</label>
+        <label for="${prefix}_desc">${I18nextManager.getInstance().i18n.t('phovea:importer.description')}</label>
         <textarea class="form-control" id="${prefix}_desc" name="desc" rows="3"></textarea>
       </div>`;
   }
@@ -40,8 +40,8 @@ export class ImportUtils {
     $root.html(`${ImportUtils.commonFields(name)}
         <table class="table table-striped table-condensed">
           <thead>
-            <th>${i18n.t('phovea:importer.column')}</th>
-            <th>${i18n.t('phovea:importer.type')}</th>
+            <th>${I18nextManager.getInstance().i18n.t('phovea:importer.column')}</th>
+            <th>${I18nextManager.getInstance().i18n.t('phovea:importer.type')}</th>
           </thead>
           <tbody>
 
@@ -114,16 +114,16 @@ export class ImportUtils {
       data.forEach((d, i) => d._index = i);
     }
     const columns = config.filter((c) => c !== idProperty).map((c) => {
-      const r: IColumnDefinition = mixin(<any>{}, c);
+      const r: IColumnDefinition = BaseUtils.mixin(<any>{}, c);
       delete (<any>r).editor;
       return r;
     });
     const desc: IDataDescription = {
       type: 'table',
-      id: fixId(common.name + randomId(2)),
+      id: BaseUtils.fixId(common.name + BaseUtils.randomId(2)),
       name: common.name,
       description: common.description,
-      creator: currentUserNameOrAnonymous(),
+      creator: UserSession.getInstance().currentUserNameOrAnonymous(),
       ts: Date.now(),
       fqname: 'upload/' + common.name,
       size: [data.length, columns.length],
@@ -137,7 +137,7 @@ export class ImportUtils {
 
 
   static async importMatrix(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
-    const prefix = 'a' + randomId(3);
+    const prefix = 'a' + BaseUtils.randomId(3);
 
     const rows = header.slice(1),
       cols = data.map((d) => d.shift());
@@ -156,21 +156,21 @@ export class ImportUtils {
     const editor = await ValueTypeUtils.guessValueType(editors, 'value', -1, dataRange, byIndex);
     const configs = [{
       column: -1,
-      name: i18n.t('phovea:importer.rowName'),
+      name: I18nextManager.getInstance().i18n.t('phovea:importer.rowName'),
       value: {
         type: 'idType'
       },
       editor: editors.filter((e) => e.id === 'idType')[0]
     }, {
       column: -1,
-      name: i18n.t('phovea:importer.columnName'),
+      name: I18nextManager.getInstance().i18n.t('phovea:importer.columnName'),
       value: {
         type: 'idType'
       },
       editor: editors.filter((e) => e.id === 'idType')[0]
     }, {
       column: -1,
-      name: i18n.t('phovea:importer.value'),
+      name: I18nextManager.getInstance().i18n.t('phovea:importer.value'),
       value: {
         type: null
       },
@@ -190,7 +190,7 @@ export class ImportUtils {
     $rows.select('select').on('change', ValueTypeUtils.updateType(editors, false));
     $rows.select('button').on('click', (d, i) => {
       if (i < 2) {
-        d.editor.guessOptions(d.value, i === 0 ? rows : cols, identity);
+        d.editor.guessOptions(d.value, i === 0 ? rows : cols, BaseUtils.identity);
       } else {
         d.editor.guessOptions(d.value, dataRange, byIndex);
       }
@@ -199,8 +199,8 @@ export class ImportUtils {
 
     //parse data
     //TODO set rows and cols
-    configs[0].editor.parse(configs[0].value, rows, identity);
-    configs[1].editor.parse(configs[1].value, cols, identity);
+    configs[0].editor.parse(configs[0].value, rows, BaseUtils.identity);
+    configs[1].editor.parse(configs[1].value, cols, BaseUtils.identity);
     configs[2].editor.parse(configs[2].value, dataRange, byIndex);
 
 
@@ -208,10 +208,10 @@ export class ImportUtils {
 
     const desc: IDataDescription = {
       type: 'matrix',
-      id: fixId(common.name + randomId(3)),
+      id: BaseUtils.fixId(common.name + BaseUtils.randomId(3)),
       name: common.name,
       fqname: 'upload/' + common.name,
-      creator: currentUserNameOrAnonymous(),
+      creator: UserSession.getInstance().currentUserNameOrAnonymous(),
       ts: Date.now(),
       description: common.description,
       size: [rows.length, cols.length],
