@@ -2,12 +2,12 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {mixin, fixId, randomId, identity} from 'phovea_core/src/index';
+import {mixin, fixId, randomId, identity} from 'phovea_core';
 import * as d3 from 'd3';
 import {ITypeDefinition, ValueTypeEditor, ValueTypeUtils} from './valuetypes';
-import {IDataDescription} from 'phovea_core/src/datatype';
-import {currentUserNameOrAnonymous} from 'phovea_core/src/security';
-import i18n from 'phovea_core/src/i18n';
+import {IDataDescription} from 'phovea_core';
+import {currentUserNameOrAnonymous} from 'phovea_core';
+import i18n from 'phovea_core';
 
 export interface IColumnDefinition {
   name: string;

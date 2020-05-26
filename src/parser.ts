@@ -4,7 +4,7 @@
 
 
 
-import {mixin} from 'phovea_core/src/index';
+import {mixin} from 'phovea_core';
 import * as papaparse from 'papaparse';
 
 export interface IParseResult {

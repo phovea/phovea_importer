@@ -3,12 +3,12 @@
  */
 
 import './style.scss';
-import {mixin} from 'phovea_core/src/index';
-import {EventHandler} from 'phovea_core/src/event';
+import {mixin} from 'phovea_core';
+import {EventHandler} from 'phovea_core';
 import {parseCSV} from './parser';
 import * as d3 from 'd3';
 import {ValueTypeEditor} from './valuetypes';
-import {IDataDescription} from 'phovea_core/src/datatype';
+import {IDataDescription} from 'phovea_core';
 import {ImportUtils} from './ImportUtils';
 
 export interface IImporterOptions {

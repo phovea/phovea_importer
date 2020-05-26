@@ -2,12 +2,12 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {resolve as resolveIDType} from 'phovea_core/src/idtype';
-import {listAll as listAllIDTypes} from 'phovea_core/src/idtype/manager';
+import {resolve as resolveIDType} from 'phovea_core';
+import {listAll as listAllIDTypes} from 'phovea_core';
 import {ITypeDefinition, IValueTypeEditor, ValueTypeUtils, ValueTypeEditor} from './valuetypes';
-import {list} from 'phovea_core/src/plugin';
-import {isInternalIDType} from 'phovea_core/src/idtype/manager';
-import i18n from 'phovea_core/src/i18n';
+import {list} from 'phovea_core';
+import {isInternalIDType} from 'phovea_core';
+import i18n from 'phovea_core';
 
 /**
  * edits the given type definition in place with idtype properties
