@@ -6,7 +6,6 @@ import * as papaparse from 'papaparse';
 const defaultOptions = {
     skipEmptyLines: true
 };
-
 export class ParserUtils {
     /**
      * parses the given csv file/blob using PapaParse

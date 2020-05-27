@@ -1,5 +1,5 @@
 import { PluginRegistry } from 'phovea_core';
-import { LocaleExtensionPointDesc } from 'phovea_core';
+import { EP_PHOVEA_CORE_LOCALE } from 'phovea_core';
 export default function (registry) {
     //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
     registry.push('importer_value_type', 'categorical', function () {
@@ -38,7 +38,7 @@ export default function (registry) {
         'priority': 50,
         'implicit': true
     });
-    registry.push(LocaleExtensionPointDesc.EP_PHOVEA_CORE_LOCALE, 'phoveaImporterLocaleEN', function () {
+    registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaImporterLocaleEN', function () {
         return import('./assets/locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
     }, {
         ns: 'phovea',
