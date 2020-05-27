@@ -22,30 +22,32 @@ const defaultOptions = {
   skipEmptyLines: true
 };
 
-/**
- * parses the given csv file/blob using PapaParse
- * @param data
- * @param options additional options
- * @return {Promise<R>|Promise}
- */
-export function parseCSV(data: any, options: ICSVParsingOptions = {}): Promise<IParseResult> {
+export class ParserUtils {
 
-  return new Promise((resolve, reject) => {
-    papaparse.parse(data, BaseUtils.mixin({
-      complete: (result) => resolve({data: result.data, meta: result.meta}),
-      error: (error) => reject(error)
-    }, defaultOptions, options));
-  });
+  /**
+   * parses the given csv file/blob using PapaParse
+   * @param data
+   * @param options additional options
+   * @return {Promise<R>|Promise}
+   */
+  static parseCSV(data: any, options: ICSVParsingOptions = {}): Promise<IParseResult> {
+
+    return new Promise((resolve, reject) => {
+      papaparse.parse(data, BaseUtils.mixin({
+        complete: (result) => resolve({data: result.data, meta: result.meta}),
+        error: (error) => reject(error)
+      }, defaultOptions, options));
+    });
+  }
+
+  static streamCSV(data: any, chunk: (chunk: IParseResult)=>any, options: ICSVParsingOptions = {}): Promise<IParseResult> {
+
+    return new Promise((resolve, reject) => {
+      papaparse.parse(data, BaseUtils.mixin({
+        complete: (result) => resolve(null),
+        chunk: (result) => chunk({data: result.data, meta: result.meta}),
+        error: (error) => reject(error)
+      }, defaultOptions, options));
+    });
+  }
 }
-
-export function streamCSV(data: any, chunk: (chunk: IParseResult)=>any, options: ICSVParsingOptions = {}): Promise<IParseResult> {
-
-  return new Promise((resolve, reject) => {
-    papaparse.parse(data, BaseUtils.mixin({
-      complete: (result) => resolve(null),
-      chunk: (result) => chunk({data: result.data, meta: result.meta}),
-      error: (error) => reject(error)
-    }, defaultOptions, options));
-  });
-}
-

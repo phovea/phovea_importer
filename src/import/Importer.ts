@@ -5,7 +5,7 @@
 import './style.scss';
 import {BaseUtils} from 'phovea_core';
 import {EventHandler} from 'phovea_core';
-import {parseCSV} from './parser';
+import {ParserUtils} from './parser';
 import * as d3 from 'd3';
 import {ValueTypeEditor} from '../valuetype/valuetypes';
 import {IDataDescription} from 'phovea_core';
@@ -38,7 +38,7 @@ export class Importer extends EventHandler {
     let name = file.name;
     name = name.substring(0, name.lastIndexOf('.')); //remove .csv
 
-    Promise.all([<any>parseCSV(file), ValueTypeEditor.createValueTypeEditors()]).then((results) => {
+    Promise.all([<any>ParserUtils.parseCSV(file), ValueTypeEditor.createValueTypeEditors()]).then((results) => {
       const editors = results[1];
       const data = results[0].data;
       const header = data.shift();
