@@ -31,7 +31,7 @@ export default function (registry) {
         'priority': 100
     });
     registry.push('importer_value_type', 'idType', function () {
-        return import('./valuetype/valuetype_idtype').then((v) => v.IDTypeUtils);
+        return import('./valuetype/idtypes').then((v) => v.IDTypeUtils);
     }, {
         'factory': 'idType',
         'name': 'IDType',

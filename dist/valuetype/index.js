@@ -1,3 +1,3 @@
-export * from './valuetype_idtype';
 export * from './valuetypes';
+export * from './idtypes';
 //# sourceMappingURL=index.js.map
