@@ -252,7 +252,7 @@ function isCategorical(name: string, index: number, data: any[], accessor: (row:
   let validSize = 0;
   for (let i = 0; i < testSize; ++i) {
     const v = accessor(data[i]);
-    if (v == null || v.trim().length === 0) {
+    if (isEmptyString(v)) {
       continue; //skip empty samples
     }
     validSize++;
@@ -320,8 +320,22 @@ export function editNumerical(definition: ITypeDefinition): Promise<ITypeDefinit
   });
 }
 
-function isMissingNumber(v: string) {
-  return v == null || v.trim().length === 0 || v === 'NaN';
+/**
+ * Checks if the given value is an empty string
+ * @param value Input value
+ * @returns Returns a true if the given value is an empty string. Otherwise returns false.
+ */
+function isEmptyString(value: any): boolean {
+  return value === null || value === undefined || (typeof value === 'string' && value.trim().length === 0);
+}
+
+/**
+ * Checks if the given string is a missing value, i.e., an empty string or NaN.
+ * @param value Input string
+ * @returns Returns a true if the given value is a missing value. Otherwise returns false.
+ */
+function isMissingNumber(value: string) {
+  return isEmptyString(value) || value === 'NaN';
 }
 
 export function guessNumerical(def: ITypeDefinition, data: any[], accessor: (row: any) => string) {
