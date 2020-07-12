@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import './main.scss';
+import '../scss/main.scss';
 import {BaseUtils} from 'phovea_core';
 import {EventHandler} from 'phovea_core';
 import {ParserUtils} from './parser';
