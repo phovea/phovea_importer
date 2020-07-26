@@ -45,7 +45,7 @@ export default function (registry: IRegistry) {
   });
 
   registry.push(EP_PHOVEA_CORE_LOCALE, 'phoveaImporterLocaleEN', function () {
-    return import('./assets/locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
+    return import('./locales/en/phovea.json').then(PluginRegistry.getInstance().asResource);
   }, <ILocaleEPDesc>{
     ns: 'phovea',
   });

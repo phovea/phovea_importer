@@ -71,7 +71,18 @@ export declare class ValueTypeUtils {
      * @return {Promise<R>|Promise}
      */
     static editNumerical(definition: ITypeDefinition): Promise<ITypeDefinition>;
-    static isMissingNumber(v: string): boolean;
+    /**
+     * Checks if the given value is an empty string
+     * @param value Input value
+     * @returns Returns a true if the given value is an empty string. Otherwise returns false.
+     */
+    static isEmptyString(value: any): boolean;
+    /**
+     * Checks if the given string is a missing value, i.e., an empty string or NaN.
+     * @param value Input string
+     * @returns Returns a true if the given value is a missing value. Otherwise returns false.
+     */
+    static isMissingNumber(value: string): boolean;
     static guessNumerical(def: ITypeDefinition, data: any[], accessor: (row: any) => string): ITypeDefinition;
     static isNumerical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): number;
     static parseNumerical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string): any[];
