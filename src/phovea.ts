@@ -3,12 +3,21 @@ import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from 'phovea_core';
 
 export default function (registry: IRegistry) {
   //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
+
+  registry.push('importer_value_type', 'boolean', function () {
+    return import('./valuetype/valuetypes').then((v) => v.ValueTypeUtils);
+  }, {
+    'factory': 'boolean',
+    'name': 'Boolean',
+    'priority': 30 // test first for boolean then for categorical
+  });
+
   registry.push('importer_value_type', 'categorical', function () {
     return import('./valuetype/valuetypes').then((v) => v.ValueTypeUtils);
   }, {
     'factory': 'categorical',
     'name': 'Categorical',
-    'priority': 30
+    'priority': 40 // test first for boolean then for categorical
   });
 
   registry.push('importer_value_type', 'real', function () {
