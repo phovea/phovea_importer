@@ -67,7 +67,7 @@
   "dependencies": {
     "d3": "~3.5.17",
     "papaparse": "~5.1.1",
-    "phovea_core": "^v5.0.1",
+    "phovea_core": "^5.0.1",
     "phovea_d3": "^5.0.0",
     "phovea_ui": "^5.0.0"
   }
