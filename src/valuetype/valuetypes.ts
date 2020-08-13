@@ -414,6 +414,38 @@ export class ValueTypeUtils {
       getOptionsMarkup: ValueTypeUtils.singleOption
     };
   }
+
+
+  static isBoolean(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number) {
+    const testSize = Math.min(data.length, sampleSize);
+    if (testSize <= 0) {
+      return 0;
+    }
+    const categories = {};
+    let validSize = 0;
+    for (let i = 0; i < testSize; ++i) {
+      const v = accessor(data[i]);
+      if (typeof v !== 'boolean' || v === null || v === undefined) {
+        continue; //skip empty samples
+      }
+      validSize++;
+      categories[v] = v;
+    }
+
+    const numCats = Object.keys(categories).length;
+    return 1 - numCats / validSize;
+  }
+
+  static boolean(): IValueTypeEditor {
+    return {
+      isType: ValueTypeUtils.isBoolean,
+      parse: ValueTypeUtils.parseCategorical,
+      guessOptions: ValueTypeUtils.guessCategorical,
+      edit: ValueTypeUtils.editCategorical,
+      getOptionsMarkup: ValueTypeUtils.singleOption
+    };
+  }
+
   /**
    * guesses the value type returning a string
    * @param editors the possible types

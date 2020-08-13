@@ -87,6 +87,8 @@ export declare class ValueTypeUtils {
     static isNumerical(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): number;
     static parseNumerical(def: ITypeDefinition, data: any[], accessor: (row: any, value?: any) => string): any[];
     static numerical(): IValueTypeEditor;
+    static isBoolean(name: string, index: number, data: any[], accessor: (row: any) => string, sampleSize: number): number;
+    static boolean(): IValueTypeEditor;
     /**
      * guesses the value type returning a string
      * @param editors the possible types
