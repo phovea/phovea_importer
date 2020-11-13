@@ -2,7 +2,6 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import '../scss/main.scss';
 import {BaseUtils} from 'phovea_core';
 import {EventHandler} from 'phovea_core';
 import {ParserUtils} from './parser';
@@ -104,5 +103,3 @@ export class Importer extends EventHandler {
     $dropZone.on('dragover', over).on('dragleave', over).on('drop', select);
   }
 }
-
-
