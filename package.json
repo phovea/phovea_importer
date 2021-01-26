@@ -2,7 +2,7 @@
   "name": "phovea_importer",
   "description": "Flexible smart and visual data importer for web based visualization",
   "homepage": "https://phovea.caleydo.org",
-  "version": "6.1.1-SNAPSHOT",
+  "version": "7.0.0",
   "author": {
     "name": "The Caleydo Team",
     "email": "contact@caleydo.org",
@@ -67,8 +67,8 @@
   "dependencies": {
     "d3": "~3.5.17",
     "papaparse": "~5.3.0",
-    "phovea_core": "github:phovea/phovea_core#develop",
-    "phovea_d3": "github:phovea/phovea_d3#develop",
-    "phovea_ui": "github:phovea/phovea_ui#develop"
+    "phovea_core": "^release-6.0.0",
+    "phovea_d3": "^release-6.0.0",
+    "phovea_ui": "^release-6.0.0"
   }
 }
