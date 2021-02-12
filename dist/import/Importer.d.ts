@@ -1,7 +1,6 @@
 /**
  * Created by Samuel Gratzl on 29.09.2016.
  */
-import '../scss/main.scss';
 import { EventHandler } from 'phovea_core';
 import * as d3 from 'd3';
 import { IDataDescription } from 'phovea_core';
