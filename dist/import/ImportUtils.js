@@ -27,7 +27,7 @@ export class ImportUtils {
     }
     static async importTable(editors, $root, header, data, name) {
         $root.html(`${ImportUtils.commonFields(name)}
-        <table class="table table-striped table-condensed">
+        <table class="table table-striped table-sm">
           <thead>
             <th>${I18nextManager.getInstance().i18n.t('phovea:importer.column')}</th>
             <th>${I18nextManager.getInstance().i18n.t('phovea:importer.type')}</th>
