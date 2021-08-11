@@ -38,7 +38,7 @@ export class ImportUtils {
 
   static async importTable(editors: ValueTypeEditor[], $root: d3.Selection<any>, header: string[], data: string[][], name: string) {
     $root.html(`${ImportUtils.commonFields(name)}
-        <table class="table table-striped table-condensed">
+        <table class="table table-striped table-sm">
           <thead>
             <th>${I18nextManager.getInstance().i18n.t('phovea:importer.column')}</th>
             <th>${I18nextManager.getInstance().i18n.t('phovea:importer.type')}</th>
@@ -184,7 +184,7 @@ export class ImportUtils {
             <select class="form-control" ${i < 2 ? 'disabled="disabled"' : ''} id="${prefix}_${i}">
               ${editors.map((editor) => `<option value="${editor.id}" ${d.value.type === editor.id ? 'selected="selected"' : ''}>${editor.name}</option>`).join('\n')}
             </select>
-            <span class="input-group-btn"><button class="btn btn-secondary" ${!d.editor.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button></span>
+            <span class="input-group-btn"><button class="btn btn-light" ${!d.editor.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="fas fa-cog"></i></button></span>
           </div>`);
 
     $rows.select('select').on('change', ValueTypeUtils.updateType(editors, false));
