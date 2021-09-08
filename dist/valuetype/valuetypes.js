@@ -414,7 +414,7 @@ export class ValueTypeUtils {
           ${options.join('\n')}
       </select>
       <span class="input-group-btn">
-        <button class="btn btn-secondary" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="glyphicon glyphicon-cog"></i></button>
+        <button class="btn btn-light" ${!current || !current.hasEditor ? 'disabled="disabled' : ''} type="button"><i class="fas fa-cog"></i></button>
       </span>`;
     }
     static updateType(editors, emptyOne = true) {
