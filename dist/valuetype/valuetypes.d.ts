@@ -1,8 +1,8 @@
 /**
  * Created by Samuel Gratzl on 29.09.2016.
  */
-import { Dialog } from 'phovea_ui';
-import { IPlugin } from 'phovea_core';
+import { Dialog } from 'tdp_core';
+import { IPlugin } from 'tdp_core';
 export interface ITypeDefinition {
     type: string;
     [key: string]: any;

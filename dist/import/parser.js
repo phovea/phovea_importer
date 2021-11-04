@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 29.09.2016.
  */
-import { BaseUtils } from 'phovea_core';
+import { BaseUtils } from 'tdp_core';
 import * as papaparse from 'papaparse';
 const defaultOptions = {
     skipEmptyLines: true

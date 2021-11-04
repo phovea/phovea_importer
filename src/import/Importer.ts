@@ -2,12 +2,12 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {BaseUtils} from 'phovea_core';
-import {EventHandler} from 'phovea_core';
+import {BaseUtils} from 'tdp_core';
+import {EventHandler} from 'tdp_core';
 import {ParserUtils} from './parser';
 import * as d3 from 'd3';
 import {ValueTypeEditor} from '../valuetype/valuetypes';
-import {IDataDescription} from 'phovea_core';
+import {IDataDescription} from 'tdp_core';
 import {ImportUtils} from './ImportUtils';
 
 export interface IImporterOptions {

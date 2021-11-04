@@ -3,7 +3,7 @@
  */
 import * as d3 from 'd3';
 import { ITypeDefinition, ValueTypeEditor } from '../valuetype/valuetypes';
-import { IDataDescription } from 'phovea_core';
+import { IDataDescription } from 'tdp_core';
 export interface IColumnDefinition {
     name: string;
     column: string | number;

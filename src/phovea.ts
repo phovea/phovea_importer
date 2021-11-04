@@ -1,5 +1,5 @@
-import {IRegistry, PluginRegistry} from 'phovea_core';
-import {EP_PHOVEA_CORE_LOCALE, ILocaleEPDesc} from 'phovea_core';
+import {EP_PHOVEA_CORE_LOCALE, IRegistry, PluginRegistry} from 'tdp_core';
+import {ILocaleEPDesc} from 'tdp_core';
 
 export default function (registry: IRegistry) {
   //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
