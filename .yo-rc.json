@@ -9,9 +9,8 @@
       "papaparse"
     ],
     "modules": [
-      "phovea_core",
-      "phovea_d3",
-      "phovea_ui"
+      "tdp_core",
+      "phovea_d3"
     ],
     "extensions": [
       {
