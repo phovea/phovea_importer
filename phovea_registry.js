@@ -12,6 +12,5 @@ import reg from './dist/phovea';
  */
 //other modules
 import 'tdp_core/phovea_registry.js';
-import 'phovea_d3/phovea_registry.js';
 //self
 PluginRegistry.getInstance().register('phovea_importer', reg);
