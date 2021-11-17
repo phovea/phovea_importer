@@ -67,7 +67,7 @@
   "dependencies": {
     "d3": "~3.5.17",
     "papaparse": "~5.3.0",
-    "tdp_core": "github:datavisyn/tdp_core#visyn",
-    "phovea_d3": "github:phovea/phovea_d3#visyn"
+    "tdp_core": "github:datavisyn/tdp_core#develop",
+    "phovea_d3": "github:phovea/phovea_d3#develop"
   }
 }
