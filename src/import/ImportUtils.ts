@@ -2,12 +2,12 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {BaseUtils} from 'phovea_core';
+import {BaseUtils} from 'tdp_core';
 import * as d3 from 'd3';
 import {ITypeDefinition, ValueTypeEditor, ValueTypeUtils} from '../valuetype/valuetypes';
-import {IDataDescription} from 'phovea_core';
-import {UserSession} from 'phovea_core';
-import {I18nextManager} from 'phovea_core';
+import {IDataDescription} from 'tdp_core';
+import {UserSession} from 'tdp_core';
+import {I18nextManager} from 'tdp_core';
 
 export interface IColumnDefinition {
   name: string;

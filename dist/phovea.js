@@ -1,5 +1,4 @@
-import { PluginRegistry } from 'phovea_core';
-import { EP_PHOVEA_CORE_LOCALE } from 'phovea_core';
+import { EP_PHOVEA_CORE_LOCALE, PluginRegistry } from 'tdp_core';
 export default function (registry) {
     //registry.push('extension-type', 'extension-id', function() { return import('./extension_impl'); }, {});
     registry.push('importer_value_type', 'boolean', function () {

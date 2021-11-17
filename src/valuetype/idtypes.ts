@@ -2,10 +2,10 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {IDTypeManager} from 'phovea_core';
+import {IDTypeManager} from 'tdp_core';
 import {ITypeDefinition, IValueTypeEditor, ValueTypeUtils, ValueTypeEditor} from './valuetypes';
-import {PluginRegistry} from 'phovea_core';
-import {I18nextManager} from 'phovea_core';
+import {PluginRegistry} from 'tdp_core';
+import {I18nextManager} from 'tdp_core';
 
 /**
  * edits the given type definition in place with idtype properties

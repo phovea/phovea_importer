@@ -2,10 +2,10 @@
  * Created by Samuel Gratzl on 29.09.2016.
  */
 
-import {Dialog} from 'phovea_ui';
-import {PluginRegistry, IPlugin} from 'phovea_core';
-import {BaseUtils} from 'phovea_core';
-import {I18nextManager} from 'phovea_core';
+import {Dialog} from 'tdp_core';
+import {PluginRegistry, IPlugin} from 'tdp_core';
+import {BaseUtils} from 'tdp_core';
+import {I18nextManager} from 'tdp_core';
 
 //https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category10
 const categoryColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];

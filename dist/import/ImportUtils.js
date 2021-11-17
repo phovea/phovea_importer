@@ -1,11 +1,11 @@
 /**
  * Created by Samuel Gratzl on 29.09.2016.
  */
-import { BaseUtils } from 'phovea_core';
+import { BaseUtils } from 'tdp_core';
 import * as d3 from 'd3';
 import { ValueTypeUtils } from '../valuetype/valuetypes';
-import { UserSession } from 'phovea_core';
-import { I18nextManager } from 'phovea_core';
+import { UserSession } from 'tdp_core';
+import { I18nextManager } from 'tdp_core';
 export class ImportUtils {
     static commonFields(name) {
         const prefix = 'i' + BaseUtils.randomId(3);

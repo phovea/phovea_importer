@@ -4,7 +4,7 @@
 
 
 
-import {BaseUtils} from 'phovea_core';
+import {BaseUtils} from 'tdp_core';
 import * as papaparse from 'papaparse';
 
 export interface IParseResult {
